@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN" monitorInterval="30">
+
+    <properties>
+        <Property name="fileName">./logs</Property>
+        <Property name="fileGz">./logs/gz</Property>
+        <Property name="LOG_PATTERN">%d [%-5p] [%t] (%C.%M:%L) - %m%n</Property>
+    </properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <RollingRandomAccessFile name="infoFile" fileName="${fileName}/info.log" immediateFlush="false"
+                                 filePattern="${fileGz}/$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.info.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+            </Policies>
+
+            <Filters>
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+
+            <DefaultRolloverStrategy max="50"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="errorFile" fileName="${fileName}/error.log" immediateFlush="false"
+                                 filePattern="${fileGz}/$${date:yyyy-MM}/%d{yyyy-MM-dd}-%i.error.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+            </Policies>
+
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+
+            <DefaultRolloverStrategy max="50"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <AsyncRoot level="debug" includeLocation="true">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="infoFile"/>
+            <AppenderRef ref="errorFile"/>
+        </AsyncRoot>
+    </Loggers>
+
+</configuration>
