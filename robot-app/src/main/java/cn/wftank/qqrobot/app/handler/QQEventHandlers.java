@@ -52,7 +52,9 @@ public class QQEventHandlers extends SimpleListenerHost {
                 plainTextBuilder.append(singleMessage.contentToString());
             }
         }
-        processCommand(event, plainTextBuilder);
+        if (isAtBot){
+            processCommand(event, plainTextBuilder);
+        }
     }
 
     private void processCommand(@NotNull GroupMessageEvent event, StringBuilder plainTextBuilder) {
