@@ -16,8 +16,7 @@ public class ScheduleTest
      * Rigorous Test :-)
      */
     @Test
-    public void shouldAnswerWithTrue()
-    {
+    public void shouldAnswerWithTrue(){
         assertTrue( true );
     }
 }

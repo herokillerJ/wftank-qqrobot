@@ -11,6 +11,14 @@
   <artifactId>robot-app</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <kotlin.version>1.4.21</kotlin.version>
+    <logj.version>2.13.1</logj.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>cn.wftank</groupId>
@@ -27,11 +35,28 @@
       <artifactId>robot-schedule</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <!--QQ机器人框架-->
+    <dependency>
+      <groupId>net.mamoe</groupId>
+      <artifactId>mirai-core-jvm</artifactId>
+      <version>2.4.0</version> <!-- 替换版本为你需要的版本 -->
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <version>${kotlin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.mamoe</groupId>
+      <artifactId>mirai-login-solver-selenium</artifactId>
+      <version>1.0-dev-16</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
   <build>
     <plugins>
