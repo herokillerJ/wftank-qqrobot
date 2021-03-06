@@ -54,7 +54,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
         if (event.isFirst()){
             group.sendMessage(MessageUtils.newChain()
                     .plus("小助手开始监控游戏版本更新啦！").plus(new Face(Face.ZHENG_YAN))
-                    .plus("，有新消息我会及时发布到群里，可以把我设置为特别关注来获取最新消息哟~")
+                    .plus("，有新消息我会及时发布到群里，可以关注我来获取最新消息哟~")
             );
         }else{
             group.sendMessage(MessageUtils.newChain()
@@ -75,7 +75,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
         if (event.isFirst()){
             group.sendMessage(MessageUtils.newChain()
                     .plus("小助手开始监控官方发布的公告啦！").plus(new Face(Face.ZHENG_YAN))
-                    .plus("，有新消息我会及时发布到群里，可以把我设置为特别关注来获取最新消息哟~")
+                    .plus("，有新消息我会及时发布到群里，可以关注我来获取最新消息哟~")
             );
         }else{
             group.sendMessage(MessageUtils.newChain()
