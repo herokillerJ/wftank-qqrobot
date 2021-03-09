@@ -37,6 +37,17 @@ public class JsonUtil {
         return null;
     }
 
+    public static String toPrettyJson(Object obj){
+        if (obj != null){
+            try {
+                return  MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+            } catch (JsonProcessingException e) {
+                log.error(ExceptionUtils.getStackTrace(e));
+            }
+        }
+        return null;
+    }
+
     public static <T> T parseJson(String json, TypeReference<T> typeReference){
         if (StringUtils.isNoneBlank(json)){
             try {

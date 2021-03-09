@@ -1,6 +1,7 @@
 package cn.wftank.qqrobot.app.handler;
 
 import cn.wftank.qqrobot.app.finder.IndexEntity;
+import cn.wftank.qqrobot.app.finder.MatchIndexEntiy;
 import cn.wftank.qqrobot.app.finder.SCDataFinder;
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.app.model.vo.ProductRentShopVO;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -36,9 +38,6 @@ public class QQEventHandlers extends SimpleListenerHost {
         boolean isAtBot = false;
         StringBuilder plainTextBuilder = new StringBuilder("");
         //判断是不是在@小助手
-        if (messageChain.size() < 2 || !(messageChain.get(1) instanceof At)){
-            return;
-        }
         for (int i = 0; i < messageChain.size(); i++) {
             SingleMessage singleMessage = messageChain.get(i);
             //判断是不是在@小助手
@@ -48,17 +47,74 @@ public class QQEventHandlers extends SimpleListenerHost {
                     isAtBot = true;
                 }
             }
-            if (isAtBot && singleMessage instanceof PlainText){
+            if (singleMessage instanceof PlainText){
                 plainTextBuilder.append(singleMessage.contentToString());
             }
         }
+        String content = plainTextBuilder.toString().trim();
         if (isAtBot){
-            processCommand(event, plainTextBuilder);
+            processCommand(event, content);
+        }else{
+            //通过正则确定是否在问商品信息
+            processAutoFind(event, content);
         }
     }
 
-    private void processCommand(@NotNull GroupMessageEvent event, StringBuilder plainTextBuilder) {
-        String content = plainTextBuilder.toString().trim();
+    private void processAutoFind(GroupMessageEvent event, String content) {
+        List<MatchIndexEntiy> matchIndexList = scDataFinder.autoFind(content);
+        if (CollectionUtils.isEmpty(matchIndexList)) return;
+        MessageChain message = MessageUtils.newChain();
+        message = message.plus("小助手感觉您似乎在询问游戏内的商品购买位置\n");
+        final QuoteReply quote = new QuoteReply(event.getSource());
+        if (matchIndexList.size() == 1){
+            message = message.plus("已为您匹配到了一条商品信息")
+                    .plus(new Face(Face.DE_YI)).plus("，详情如下：\n");
+            JsonProductVO productVO = scDataFinder.getProductInfo(matchIndexList.get(0).getPath());
+            message = convertProduct(message, productVO);
+        }else{
+            //找到的数量大于1条
+            message = message.plus("已为您匹配到"+matchIndexList.size()+"条商品信息")
+                    .plus(new Face(Face.WU_YAN_XIAO).plus("\n")).plus("，名字最相近的商品详情如下：\n");
+            JsonProductVO productVO = scDataFinder.getProductInfo(matchIndexList.get(0).getPath());
+            message = convertProduct(message, productVO);
+            message = message.plus("\n如果不正确，还请去https://wftank.cn/search查询");
+        }
+        event.getGroup().sendMessage(quote
+                .plus(message));
+    }
+
+    private MessageChain convertProduct(MessageChain message, JsonProductVO productVO) {
+        if (productVO.getCanBuy()) {
+            message = message.plus("商品名称：")
+                    .plus(productVO.getNameCn())
+                    .plus("[" + productVO.getName() + "]\n");
+            message = message.plus("购买地点：\n");
+            List<ProductShopVO> shopBuy = productVO.getShopBuy();
+            Iterator<ProductShopVO> iterator = shopBuy.iterator();
+            while (iterator.hasNext()) {
+                ProductShopVO next = iterator.next();
+                if (next.getLayoutName().toLowerCase().contains("cryastro")) continue;
+                message = message.plus(next.getLayoutNameCn() + "\t" + new BigDecimal(next.getCurrentPrice()).toPlainString() + "\n");
+            }
+        }
+        if (productVO.getCanRent()) {
+            message = message.plus("租赁地点：\n");
+            List<ProductRentShopVO> shopRent = productVO.getShopRent();
+            Iterator<ProductRentShopVO> iterator = shopRent.iterator();
+            while (iterator.hasNext()) {
+                ProductRentShopVO next = iterator.next();
+                if (next.getLayoutName().toLowerCase().contains("cryastro")) continue;
+                message = message.plus(next.getLayoutNameCn() + "\n")
+                        .plus("租一天：" + next.getRentPrice1() + "\n")
+                        .plus("租三天：" + next.getRentPrice3() + "\n")
+                        .plus("租七天：" + next.getRentPrice7() + "\n")
+                        .plus("租三十天：" + next.getRentPrice30() + "\n");
+            }
+        }
+        return message;
+    }
+
+    private void processCommand(@NotNull GroupMessageEvent event, String content) {
         boolean isCommand = false;
         if (content.startsWith("/")){
             isCommand = true;
@@ -110,38 +166,12 @@ public class QQEventHandlers extends SimpleListenerHost {
         }else if(search.size() == 1){
             JsonProductVO productVO = scDataFinder.getProductInfo(search.get(0).getPath());
             if (productVO.getCommodity()){
-                message = message.plus("贸易品机器人暂不支持查询,请去下面提示的网站查询：\n");
+                message = message.plus("机器人暂不支持查询贸易品,请去下面提示的网站查询：\n");
             }else{
                 //确定了唯一商品
                 message = message.plus("找到商品了，详情如下：")
                         .plus(new Face(Face.DE_YI).plus("\n"));
-                if (productVO.getCanBuy()){
-                    message = message.plus("商品名称：")
-                            .plus(productVO.getNameCn())
-                            .plus("["+productVO.getName()+"]\n");
-                    message = message.plus("购买地点：\n");
-                    List<ProductShopVO> shopBuy = productVO.getShopBuy();
-                    Iterator<ProductShopVO> iterator = shopBuy.iterator();
-                    while (iterator.hasNext()){
-                        ProductShopVO next = iterator.next();
-                        if (next.getLayoutName().toLowerCase().contains("cryastro")) continue;
-                        message = message.plus(next.getLayoutNameCn()+"\t"+new BigDecimal(next.getCurrentPrice()).toPlainString()+"\n");
-                    }
-                }
-                if (productVO.getCanRent()){
-                    message = message.plus("租赁地点：\n");
-                    List<ProductRentShopVO> shopRent = productVO.getShopRent();
-                    Iterator<ProductRentShopVO> iterator = shopRent.iterator();
-                    while (iterator.hasNext()){
-                        ProductRentShopVO next = iterator.next();
-                        if (next.getLayoutName().toLowerCase().contains("cryastro")) continue;
-                        message = message.plus(next.getLayoutNameCn()+"\n")
-                                .plus("租一天："+next.getRentPrice1()+"\n")
-                                .plus("租三天："+next.getRentPrice3()+"\n")
-                                .plus("租七天："+next.getRentPrice7()+"\n")
-                                .plus("租三十天："+next.getRentPrice30()+"\n");
-                    }
-                }
+                message = convertProduct(message, productVO);
             }
 
         }else if (search.size() > limit){
@@ -175,4 +205,6 @@ public class QQEventHandlers extends SimpleListenerHost {
 //        return ListeningStatus.LISTENING; // 表示继续监听事件
 //        // return ListeningStatus.STOPPED; // 表示停止监听事件
 //    }
+
+
 }

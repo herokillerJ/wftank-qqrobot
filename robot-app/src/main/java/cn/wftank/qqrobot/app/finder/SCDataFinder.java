@@ -8,21 +8,33 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class SCDataFinder {
 
     private List<IndexEntity> indexList = new CopyOnWriteArrayList<>();
+
+    private Map<Pattern,Integer> patternMap = new LinkedHashMap<>();
+    {
+        patternMap.put(Pattern.compile("(.+)(在|去|到|.*)(哪|那).*(买|租).*"),1);
+        load();
+    }
 
     private static final String DEFAULT_VERSION = "latest";
     private static final String URL_PREFIX = "https://cdn.jsdelivr.net/gh/herokillerJ/starcitizen-data@";
@@ -40,12 +52,17 @@ public class SCDataFinder {
         List<IndexEntity> mainList = index.getIndex();
         Index extIndex = OKHttpUtil.get(extIndexUrl, new TypeReference<Index>() {});
         mainList.addAll(extIndex.getIndex());
+        mainList = mainList.parallelStream().map(indexEntity -> {
+            indexEntity.setName(indexEntity.getName().replaceAll("\\s+", " "));
+            indexEntity.setNameCn(indexEntity.getNameCn().replaceAll("\\s+", " "));
+            return indexEntity;
+        }).collect(Collectors.toList());
         indexList.clear();
         indexList.addAll(mainList);
     }
 
     public List<IndexEntity> search(String keyword){
-        List<IndexEntity> result = new CopyOnWriteArrayList<>();
+        List<IndexEntity> result;
         boolean exact = false;
         if (keyword.startsWith("{") && keyword.endsWith("}")){
             exact = true;
@@ -53,20 +70,17 @@ public class SCDataFinder {
         }
         boolean finalExact = exact;
         String finalKeyword = keyword;
-        indexList.parallelStream().forEach(indexEntity -> {
+        result = indexList.parallelStream().filter(indexEntity -> {
             if (finalExact){
-                if (indexEntity.getName().equalsIgnoreCase(finalKeyword.toLowerCase())
-                        || indexEntity.getNameCn().equals(finalKeyword)){
-                    result.add(indexEntity);
-                }
+                //精确匹配
+                return indexEntity.getName().equalsIgnoreCase(finalKeyword.toLowerCase())
+                        || indexEntity.getNameCn().equals(finalKeyword);
             }else{
-                if (indexEntity.getName().toLowerCase().contains(finalKeyword.toLowerCase())
-                        || indexEntity.getNameCn().contains(finalKeyword)){
-                    result.add(indexEntity);
-                }
+                //模糊匹配
+                return indexEntity.getName().toLowerCase().contains(finalKeyword.toLowerCase())
+                        || indexEntity.getNameCn().contains(finalKeyword);
             }
-
-        });
+        }).collect(Collectors.toList());
         return result;
     }
 
@@ -96,4 +110,137 @@ public class SCDataFinder {
         });
         return productVO;
     }
+
+    /**
+     * //通过正则确定是否在问商品信息
+     * @param content
+     */
+    public List<MatchIndexEntiy> autoFind(String content) {
+        String keywordStr = getKeywordByPattern(content);
+        if (keywordStr == null) return null;
+        List<MatchIndexEntiy> matchList = indexList.parallelStream().map(indexEntity -> {
+            /**
+             * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
+             * 先匹配中文,如果中文没匹配上,去匹配英文
+             */
+            String[] nameCnKeywords = indexEntity.getNameCn().split(" ");
+            MatchIndexEntiy matchIndexEntiy = match(keywordStr, indexEntity, nameCnKeywords);
+            if (matchIndexEntiy.getMatchCount() < 1 && matchIndexEntiy.getMatchKeyLength() < 2) {
+                String[] nameKeywords = indexEntity.getName().split(" ");
+                matchIndexEntiy = match(keywordStr, indexEntity, nameKeywords);
+            }
+            return matchIndexEntiy;
+        }).filter(matchIndexEntiy -> matchIndexEntiy.getMatchCount() > 0 || matchIndexEntiy.getMatchKeyLength() > 1)
+                .sorted((match1, match2) -> {
+                    //匹配的关键字长度越长的在前面
+                    int wordNum = match2.getMatchKeyLength() - match1.getMatchKeyLength();
+
+                    if (wordNum != 0) {
+                        return wordNum;
+                    } else {
+                        //长度相等,匹配次数多的排在前面
+                        int number = match2.getMatchCount() - match1.getMatchCount();
+                        if (number != 0){
+                            return number;
+                        }else{
+                            //前面两个都相等,那就名字短的在前面
+                            return match1.getNameCn().length() - match2.getNameCn().length();
+                        }
+                    }
+                }).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(matchList)){
+            int maxMatchCount = matchList.get(0).getMatchCount();
+            matchList = matchList.stream()
+                    .filter(entiy -> entiy.getMatchCount() == maxMatchCount)
+                    .collect(Collectors.toList());
+            return matchList;
+        }
+        return new LinkedList<>();
+    }
+
+    @NotNull
+    private MatchIndexEntiy match(String keywordStr, IndexEntity indexEntity, String[] nameKeywords) {
+        //匹配次数
+        int matchCount = 0;
+        int matchKeyLength = 0;
+        for (int i = 0; i < nameKeywords.length; i++) {
+            String nameKeyword = nameKeywords[i];
+            //根据斜杠
+            if (nameKeyword.indexOf("-")> -1){
+                String[] nameKeywordPart = nameKeyword.split("-");
+                for (int j = 0; j < nameKeywordPart.length; j++) {
+                    if (keywordStr.toLowerCase().contains(nameKeywordPart[j].toLowerCase())) {
+                        matchCount++;
+                        matchKeyLength += nameKeywordPart[j].length();
+                    };
+                }
+            }else{
+                if (keywordStr.toLowerCase().contains(nameKeyword.toLowerCase())) {
+                    matchCount++;
+                    matchKeyLength += nameKeyword.length();
+                };
+            }
+
+        }
+        //对扩展索引做支持
+        String nameCn = indexEntity.getNameCn();
+        if ((nameCn.startsWith("(")) && nameCn.indexOf(")") > -1){
+            String extendWord = nameCn.substring(1,nameCn.indexOf(")"));
+            if (keywordStr.toLowerCase().contains(extendWord)) {
+                matchCount++;
+                matchKeyLength += extendWord.length();
+            };
+        }
+        if (matchCount == 0){
+            //匹配相同的最长子串,先匹配中文,如果中文不匹配就匹配英文
+            int sameStrLength = longestCommonSubstring(keywordStr,indexEntity.getNameCn()).length();
+            if (sameStrLength < 2){
+                sameStrLength = longestCommonSubstring(keywordStr,indexEntity.getName()).length();
+            }
+            matchKeyLength += sameStrLength;
+        }
+        MatchIndexEntiy matchIndexEntiy = new MatchIndexEntiy();
+        BeanUtils.copyProperties(indexEntity,matchIndexEntiy);
+        matchIndexEntiy.setMatchCount(matchCount);
+        matchIndexEntiy.setMatchKeyLength(matchKeyLength);
+        return matchIndexEntiy;
+    }
+
+
+    private String getKeywordByPattern(String content){
+        Iterator<Map.Entry<Pattern, Integer>> iterator = patternMap.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<Pattern, Integer> entry = iterator.next();
+            Matcher matcher = entry.getKey().matcher(content);
+            while (matcher.find()){
+                return matcher.group(entry.getValue());
+            }
+        }
+        return null;
+    }
+    //找出最长相同的字符串
+    public static String longestCommonSubstring(String S1, String S2)
+    {
+        int Start = 0;
+        int Max = 0;
+        for (int i = 0; i < S1.length(); i++)
+        {
+            for (int j = 0; j < S2.length(); j++)
+            {
+                int x = 0;
+                while (Character.toLowerCase(S1.charAt(i + x)) == Character.toLowerCase(S2.charAt(j + x)))
+                {
+                    x++;
+                    if (((i + x) >= S1.length()) || ((j + x) >= S2.length())) break;
+                }
+                if (x > Max)
+                {
+                    Max = x;
+                    Start = i;
+                }
+            }
+        }
+        return S1.substring(Start, (Start + Max));
+    }
+
 }
