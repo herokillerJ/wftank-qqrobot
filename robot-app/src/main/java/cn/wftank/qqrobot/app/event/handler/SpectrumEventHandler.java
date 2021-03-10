@@ -46,7 +46,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
                     .replaceAll("Star Citizen ","")
                     .replaceAll(" Patch Notes","");
             dataChain.add(MessageUtils.newChain()
-                    .plus("新版本："+version+"更新啦！").plus(new Face(Face.ZHENG_YAN)).plus("\n")
+                    .plus("新版本："+version+"发布啦！").plus(new Face(Face.ZHENG_YAN)).plus("\n")
                     .plus("点击下面链接查看更新了什么吧~\n")
                     .plus(spectrumThread.getUrl())
             );
@@ -79,7 +79,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
             );
         }else{
             group.sendMessage(MessageUtils.newChain()
-                    .plus("官方在光谱发布的公告啦！").plus(new Face(Face.ZHENG_YAN))
+                    .plus("官方在光谱发布的公告啦！").plus(new Face(Face.ZHENG_YAN).plus("\n"))
                     .plus(dataChain)
             );
         }

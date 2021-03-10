@@ -36,7 +36,7 @@ public class TiebaEventHandler implements EventHandler<TiebaNotifyEvent> {
             );
         }else{
             group.sendMessage(MessageUtils.newChain()
-                    .plus(event.getAuthorName()+"发布新帖子啦！").plus(new Face(Face.ZHENG_YAN))
+                    .plus(event.getAuthorName()+"发布新帖子啦！").plus(new Face(Face.ZHENG_YAN).plus("\n"))
                     .plus(dataChain)
             );
         }
