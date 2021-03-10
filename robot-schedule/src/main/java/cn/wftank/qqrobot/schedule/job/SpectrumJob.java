@@ -158,7 +158,7 @@ public class SpectrumJob {
 
     @Scheduled(fixedDelay = 1000*60)
     private void issueCouncilWatchJob(){
-        String jobName = "spectrum issueCouncil watch job";
+        String jobName = "issue council watch job";
         log.info(jobName+" start");
         File file = new File("./issue_council_flag.txt");
         boolean first = false;
