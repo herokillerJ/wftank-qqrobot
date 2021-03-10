@@ -21,7 +21,7 @@ public class IssueEntityConvertor {
         return PREFIX+resultsetItem.getModule().getUrl()
                 +"/"+resultsetItem.getModule().getKey()
                 +"-"+resultsetItem.getId()
-                +resultsetItem.getTitle().replaceAll(" ","_");
+                +"-"+resultsetItem.getTitle().replaceAll(" ","_");
     }
 
 }

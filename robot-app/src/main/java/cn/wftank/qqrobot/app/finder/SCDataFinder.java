@@ -118,7 +118,7 @@ public class SCDataFinder {
     public List<MatchIndexEntity> autoFind(String content) {
         String keywordStr = getKeywordByPattern(content);
         if (keywordStr == null) return null;
-        List<MatchIndexEntity> matchList = indexList.parallelStream().map(indexEntity -> {
+        List<MatchIndexEntity> matchList = indexList.stream().map(indexEntity -> {
             /**
              * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
              * 先匹配中文,如果中文没匹配上,去匹配英文
@@ -161,12 +161,15 @@ public class SCDataFinder {
         //比indexEntity
         MatchIndexEntity matchIndexEntity = new MatchIndexEntity();
         //去除符号
-        keywordStr = keywordStr.replaceAll("\\W","");
+        keywordStr = keywordStr.replaceAll("[\\pP‘’“”]","");
         //将商品根据空格切开(比如:先锋 哨兵)
-        String[] nameCnKeywords = indexEntity.getNameCn().split(" ");
+        String[] nameCnKeywords = indexEntity.getNameCn()
+                //去掉所有除空格外的符号
+                .replaceAll("\\p{Punct}|\\d","")
+                .split(" ");
         //匹配次数
         for (int i = 0; i < nameCnKeywords.length; i++) {
-            String nameKeyword = nameCnKeywords[i].replaceAll("\\W","");
+            String nameKeyword = nameCnKeywords[i];
             //根据横杠再切开比如cf-117
             if (nameKeyword.indexOf("_")> -1){
                 String[] nameKeywordPart = nameKeyword.split("-");
@@ -199,12 +202,15 @@ public class SCDataFinder {
         //比indexEntity
         MatchIndexEntity matchIndexEntity = new MatchIndexEntity();
         //去除符号
-        keywordStr = keywordStr.replaceAll("\\W","");
+        keywordStr = keywordStr.replaceAll("[\\pP‘’“”]","");
         //将商品根据空格切开(比如:先锋 哨兵)
-        String[] nameCnKeywords = indexEntity.getName().split(" ");
+        String[] nameKeywords = indexEntity.getName()
+                //去掉所有除空格外的符号
+                .replaceAll("\\p{Punct}|\\d","")
+                .split(" ");
         //匹配次数
-        for (int i = 0; i < nameCnKeywords.length; i++) {
-            String nameKeyword = nameCnKeywords[i].replaceAll("\\W","");
+        for (int i = 0; i < nameKeywords.length; i++) {
+            String nameKeyword = nameKeywords[i];
             //根据横杠再切开比如cf-117
             if (nameKeyword.indexOf("_")> -1){
                 String[] nameKeywordPart = nameKeyword.split("-");
