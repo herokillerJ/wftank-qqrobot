@@ -32,7 +32,7 @@ public class SCDataFinder {
 
     private Map<Pattern,Integer> patternMap = new LinkedHashMap<>();
     {
-        patternMap.put(Pattern.compile("(.+)(在|去|到|.*)(哪|那).*(买|租).*"),1);
+        patternMap.put(Pattern.compile("(.+)(在|去|到|.*)(哪|那).*(买|卖|租|).*"),1);
         load();
     }
 
@@ -115,31 +115,29 @@ public class SCDataFinder {
      * //通过正则确定是否在问商品信息
      * @param content
      */
-    public List<MatchIndexEntiy> autoFind(String content) {
+    public List<MatchIndexEntity> autoFind(String content) {
         String keywordStr = getKeywordByPattern(content);
         if (keywordStr == null) return null;
-        List<MatchIndexEntiy> matchList = indexList.parallelStream().map(indexEntity -> {
+        List<MatchIndexEntity> matchList = indexList.parallelStream().map(indexEntity -> {
             /**
              * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
              * 先匹配中文,如果中文没匹配上,去匹配英文
              */
-            String[] nameCnKeywords = indexEntity.getNameCn().split(" ");
-            MatchIndexEntiy matchIndexEntiy = match(keywordStr, indexEntity, nameCnKeywords);
-            if (matchIndexEntiy.getMatchCount() < 1 && matchIndexEntiy.getMatchKeyLength() < 2) {
-                String[] nameKeywords = indexEntity.getName().split(" ");
-                matchIndexEntiy = match(keywordStr, indexEntity, nameKeywords);
+            MatchIndexEntity matchIndexEntity = matchCn(keywordStr, indexEntity);
+            if (matchIndexEntity.getMatchCount().get() < 1 && matchIndexEntity.getMatchKeyLength().get() < 2) {
+                matchIndexEntity = match(keywordStr, indexEntity);
             }
-            return matchIndexEntiy;
-        }).filter(matchIndexEntiy -> matchIndexEntiy.getMatchCount() > 0 || matchIndexEntiy.getMatchKeyLength() > 1)
+            return matchIndexEntity;
+        }).filter(matchIndexEntity -> matchIndexEntity.getMatchCount().get() > 0 || matchIndexEntity.getMatchKeyLength().get() > 1)
                 .sorted((match1, match2) -> {
                     //匹配的关键字长度越长的在前面
-                    int wordNum = match2.getMatchKeyLength() - match1.getMatchKeyLength();
+                    int wordNum = match2.getMatchKeyLength().get() - match1.getMatchKeyLength().get();
 
                     if (wordNum != 0) {
                         return wordNum;
                     } else {
                         //长度相等,匹配次数多的排在前面
-                        int number = match2.getMatchCount() - match1.getMatchCount();
+                        int number = match2.getMatchCount().get() - match1.getMatchCount().get();
                         if (number != 0){
                             return number;
                         }else{
@@ -149,9 +147,9 @@ public class SCDataFinder {
                     }
                 }).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(matchList)){
-            int maxMatchCount = matchList.get(0).getMatchCount();
+            int maxMatchCount = matchList.get(0).getMatchCount().get();
             matchList = matchList.stream()
-                    .filter(entiy -> entiy.getMatchCount() == maxMatchCount)
+                    .filter(entiy -> entiy.getMatchCount().get() == maxMatchCount)
                     .collect(Collectors.toList());
             return matchList;
         }
@@ -159,53 +157,79 @@ public class SCDataFinder {
     }
 
     @NotNull
-    private MatchIndexEntiy match(String keywordStr, IndexEntity indexEntity, String[] nameKeywords) {
+    private MatchIndexEntity matchCn(String keywordStr, IndexEntity indexEntity) {
+        //比indexEntity
+        MatchIndexEntity matchIndexEntity = new MatchIndexEntity();
+        //去除符号
+        keywordStr = keywordStr.replaceAll("\\W","");
+        //将商品根据空格切开(比如:先锋 哨兵)
+        String[] nameCnKeywords = indexEntity.getNameCn().split(" ");
         //匹配次数
-        int matchCount = 0;
-        int matchKeyLength = 0;
-        for (int i = 0; i < nameKeywords.length; i++) {
-            String nameKeyword = nameKeywords[i];
-            //根据斜杠
-            if (nameKeyword.indexOf("-")> -1){
+        for (int i = 0; i < nameCnKeywords.length; i++) {
+            String nameKeyword = nameCnKeywords[i].replaceAll("\\W","");
+            //根据横杠再切开比如cf-117
+            if (nameKeyword.indexOf("_")> -1){
                 String[] nameKeywordPart = nameKeyword.split("-");
                 for (int j = 0; j < nameKeywordPart.length; j++) {
                     if (keywordStr.toLowerCase().contains(nameKeywordPart[j].toLowerCase())) {
-                        matchCount++;
-                        matchKeyLength += nameKeywordPart[j].length();
+                        matchIndexEntity.plusMatchCount();
+                        matchIndexEntity.plusMatchKeyLength(nameKeywordPart[j].length());
                     };
                 }
             }else{
                 if (keywordStr.toLowerCase().contains(nameKeyword.toLowerCase())) {
-                    matchCount++;
-                    matchKeyLength += nameKeyword.length();
+                    matchIndexEntity.plusMatchCount();
+                    matchIndexEntity.plusMatchKeyLength(nameKeyword.length());
                 };
             }
 
         }
-        //对扩展索引做支持
-        String nameCn = indexEntity.getNameCn();
-        if ((nameCn.startsWith("(")) && nameCn.indexOf(")") > -1){
-            String extendWord = nameCn.substring(1,nameCn.indexOf(")"));
-            if (keywordStr.toLowerCase().contains(extendWord)) {
-                matchCount++;
-                matchKeyLength += extendWord.length();
-            };
-        }
-        if (matchCount == 0){
+        if (matchIndexEntity.getMatchCount().get() == 0){
             //匹配相同的最长子串,先匹配中文,如果中文不匹配就匹配英文
             int sameStrLength = longestCommonSubstring(keywordStr,indexEntity.getNameCn()).length();
-            if (sameStrLength < 2){
-                sameStrLength = longestCommonSubstring(keywordStr,indexEntity.getName()).length();
-            }
-            matchKeyLength += sameStrLength;
+            matchIndexEntity.plusMatchKeyLength(sameStrLength);
         }
-        MatchIndexEntiy matchIndexEntiy = new MatchIndexEntiy();
-        BeanUtils.copyProperties(indexEntity,matchIndexEntiy);
-        matchIndexEntiy.setMatchCount(matchCount);
-        matchIndexEntiy.setMatchKeyLength(matchKeyLength);
-        return matchIndexEntiy;
+        BeanUtils.copyProperties(indexEntity, matchIndexEntity);
+        return matchIndexEntity;
     }
 
+
+    @NotNull
+    private MatchIndexEntity match(String keywordStr, IndexEntity indexEntity) {
+        //比indexEntity
+        MatchIndexEntity matchIndexEntity = new MatchIndexEntity();
+        //去除符号
+        keywordStr = keywordStr.replaceAll("\\W","");
+        //将商品根据空格切开(比如:先锋 哨兵)
+        String[] nameCnKeywords = indexEntity.getName().split(" ");
+        //匹配次数
+        for (int i = 0; i < nameCnKeywords.length; i++) {
+            String nameKeyword = nameCnKeywords[i].replaceAll("\\W","");
+            //根据横杠再切开比如cf-117
+            if (nameKeyword.indexOf("_")> -1){
+                String[] nameKeywordPart = nameKeyword.split("-");
+                for (int j = 0; j < nameKeywordPart.length; j++) {
+                    if (keywordStr.toLowerCase().contains(nameKeywordPart[j].toLowerCase())) {
+                        matchIndexEntity.plusMatchCount();
+                        matchIndexEntity.plusMatchKeyLength(nameKeywordPart[j].length());
+                    };
+                }
+            }else{
+                if (keywordStr.toLowerCase().contains(nameKeyword.toLowerCase())) {
+                    matchIndexEntity.plusMatchCount();
+                    matchIndexEntity.plusMatchKeyLength(nameKeyword.length());
+                };
+            }
+
+        }
+        if (matchIndexEntity.getMatchCount().get() == 0){
+            //匹配相同的最长子串,先匹配中文,如果中文不匹配就匹配英文
+            int sameStrLength = longestCommonSubstring(keywordStr,indexEntity.getName()).length();
+            matchIndexEntity.plusMatchKeyLength(sameStrLength);
+        }
+        BeanUtils.copyProperties(indexEntity, matchIndexEntity);
+        return matchIndexEntity;
+    }
 
     private String getKeywordByPattern(String content){
         Iterator<Map.Entry<Pattern, Integer>> iterator = patternMap.entrySet().iterator();

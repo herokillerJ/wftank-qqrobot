@@ -1,7 +1,7 @@
 package cn.wftank.qqrobot.app.handler;
 
 import cn.wftank.qqrobot.app.finder.IndexEntity;
-import cn.wftank.qqrobot.app.finder.MatchIndexEntiy;
+import cn.wftank.qqrobot.app.finder.MatchIndexEntity;
 import cn.wftank.qqrobot.app.finder.SCDataFinder;
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.app.model.vo.ProductRentShopVO;
@@ -61,7 +61,7 @@ public class QQEventHandlers extends SimpleListenerHost {
     }
 
     private void processAutoFind(GroupMessageEvent event, String content) {
-        List<MatchIndexEntiy> matchIndexList = scDataFinder.autoFind(content);
+        List<MatchIndexEntity> matchIndexList = scDataFinder.autoFind(content);
         if (CollectionUtils.isEmpty(matchIndexList)) return;
         MessageChain message = MessageUtils.newChain();
         message = message.plus("小助手感觉您似乎在询问游戏内的商品购买位置\n");
