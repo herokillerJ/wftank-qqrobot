@@ -1,7 +1,7 @@
 package cn.wftank.qqrobot.schedule.job;
 
 import cn.wftank.qqrobot.common.event.NotifyEventPublisher;
-import cn.wftank.qqrobot.common.event.spectrum.TiebaNotifyEvent;
+import cn.wftank.qqrobot.common.event.tieba.TiebaNotifyEvent;
 import cn.wftank.qqrobot.common.model.event.TiebaThread;
 import cn.wftank.qqrobot.common.util.JsonUtil;
 import org.apache.commons.lang3.StringUtils;

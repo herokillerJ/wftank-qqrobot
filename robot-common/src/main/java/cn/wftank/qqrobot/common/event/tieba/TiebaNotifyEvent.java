@@ -1,4 +1,4 @@
-package cn.wftank.qqrobot.common.event.spectrum;
+package cn.wftank.qqrobot.common.event.tieba;
 
 import cn.wftank.qqrobot.common.event.NotifyEvent;
 import cn.wftank.qqrobot.common.model.event.TiebaThread;

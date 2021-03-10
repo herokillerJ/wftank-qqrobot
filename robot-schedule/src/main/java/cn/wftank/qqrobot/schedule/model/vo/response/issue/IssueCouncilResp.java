@@ -1,4 +1,4 @@
-package cn.wftank.qqrobot.schedule.model.vo.response.spectrum;
+package cn.wftank.qqrobot.schedule.model.vo.response.issue;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class SpectrumResp<T> {
+public class IssueCouncilResp{
 
 	@JsonProperty("msg")
 	private String msg;
@@ -17,7 +17,7 @@ public class SpectrumResp<T> {
 	private String code;
 
 	@JsonProperty("data")
-	private RespData<T> respData;
+	private Data data;
 
 	@JsonProperty("success")
 	private int success;

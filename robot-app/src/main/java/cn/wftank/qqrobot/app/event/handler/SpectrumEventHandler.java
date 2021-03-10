@@ -4,6 +4,7 @@ import cn.wftank.qqrobot.common.event.spectrum.SpectrumNotifyEvent;
 import com.lmax.disruptor.EventHandler;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.message.data.AtAll;
 import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageUtils;
@@ -58,6 +59,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
             );
         }else{
             group.sendMessage(MessageUtils.newChain()
+                    .plus(AtAll.INSTANCE)
                     .plus(dataChain)
             );
         }
@@ -79,6 +81,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
             );
         }else{
             group.sendMessage(MessageUtils.newChain()
+                    .plus(AtAll.INSTANCE)
                     .plus("官方在光谱发布的公告啦！").plus(new Face(Face.ZHENG_YAN).plus("\n"))
                     .plus(dataChain)
             );

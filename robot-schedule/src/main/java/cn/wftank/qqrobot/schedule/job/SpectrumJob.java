@@ -2,12 +2,18 @@ package cn.wftank.qqrobot.schedule.job;
 
 import cn.wftank.qqrobot.common.enums.event.spectrum.SpectrumEventType;
 import cn.wftank.qqrobot.common.event.NotifyEventPublisher;
+import cn.wftank.qqrobot.common.event.issue.IssueNotifyEvent;
 import cn.wftank.qqrobot.common.event.spectrum.SpectrumNotifyEvent;
+import cn.wftank.qqrobot.common.model.event.IssueEntity;
 import cn.wftank.qqrobot.common.model.event.SpectrumThread;
 import cn.wftank.qqrobot.common.util.JsonUtil;
 import cn.wftank.qqrobot.common.util.OKHttpUtil;
+import cn.wftank.qqrobot.schedule.convertor.IssueEntityConvertor;
 import cn.wftank.qqrobot.schedule.convertor.SpectrumThreadConvertor;
+import cn.wftank.qqrobot.schedule.model.vo.request.issue.IssueCouncilReq;
 import cn.wftank.qqrobot.schedule.model.vo.request.spectrum.SpectrumAnnouncementsReq;
+import cn.wftank.qqrobot.schedule.model.vo.response.issue.IssueCouncilResp;
+import cn.wftank.qqrobot.schedule.model.vo.response.issue.ResultsetItem;
 import cn.wftank.qqrobot.schedule.model.vo.response.spectrum.SpectrumResp;
 import cn.wftank.qqrobot.schedule.model.vo.response.spectrum.ThreadsItem;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -23,8 +28,6 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +66,7 @@ public class SpectrumJob {
             SpectrumResp<ThreadsItem> resp = OKHttpUtil.post("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
                     , req, new TypeReference<SpectrumResp<ThreadsItem>>() {});
             List<SpectrumThread> newThreads = new ArrayList<>();
-            ThreadsItem firstThread = resp.getData().getThreads().get(0);
+            ThreadsItem firstThread = resp.getRespData().getThreads().get(0);
             String newestId = firstThread.getId();
             if (first){
                 newThreads.add(SpectrumThreadConvertor.convert(firstThread));
@@ -71,7 +74,7 @@ public class SpectrumJob {
                 if (newestId.equals(latestId)){
                     return;
                 }
-                for (ThreadsItem thread : resp.getData().getThreads()) {
+                for (ThreadsItem thread : resp.getRespData().getThreads()) {
                     if (thread.getId().equals(latestId)){
                         break;
                     }else{
@@ -121,7 +124,7 @@ public class SpectrumJob {
             SpectrumResp<ThreadsItem> resp = OKHttpUtil.post("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
                     , req, new TypeReference<SpectrumResp<ThreadsItem>>() {});
             List<SpectrumThread> newThreads = new ArrayList<>();
-            ThreadsItem firstThread = resp.getData().getThreads().get(0);
+            ThreadsItem firstThread = resp.getRespData().getThreads().get(0);
             String newestId = firstThread.getId();
             if (first){
                 newThreads.add(SpectrumThreadConvertor.convert(firstThread));
@@ -129,7 +132,7 @@ public class SpectrumJob {
                 if (newestId.equals(latestId)){
                     return;
                 }
-                for (ThreadsItem thread : resp.getData().getThreads()) {
+                for (ThreadsItem thread : resp.getRespData().getThreads()) {
                     if (thread.getId().equals(latestId)){
                         break;
                     }else{
@@ -152,4 +155,62 @@ public class SpectrumJob {
         }
 
     }
+
+    @Scheduled(fixedDelay = 1000*60)
+    private void issueCouncilWatchJob(){
+        String jobName = "spectrum issueCouncil watch job";
+        log.info(jobName+" start");
+        File file = new File("./issue_council_flag.txt");
+        boolean first = false;
+        if (!file.exists()){
+            first = true;
+            try {
+                Files.createFile(file.toPath());
+            } catch (IOException e) {
+                log.error(jobName+"create flag file ex:"+ ExceptionUtils.getStackTrace(e));
+            }
+        }
+        try {
+            String latestId = Files.readString(file.toPath());
+            if (StringUtils.isBlank(latestId)){
+                first = true;
+            }
+            IssueCouncilReq req = new IssueCouncilReq();
+            req.setPage(1);
+            req.setPagesize(10);
+            req.setSort("newest");
+            req.setModuleUrl("star-citizen-alpha-3");
+            IssueCouncilResp resp = OKHttpUtil.post("https://robertsspaceindustries.com/community/issue-council/api/issue/list"
+                    , req, new TypeReference<IssueCouncilResp>() {});
+            List<IssueEntity> newIssues = new ArrayList<>();
+            ResultsetItem firstIssue = resp.getData().getResultset().get(0);
+            String newestId = firstIssue.getId();
+            if (first){
+                newIssues.add(IssueEntityConvertor.convert(firstIssue));
+            }else{
+                if (newestId.equals(latestId)){
+                    return;
+                }
+                for (ResultsetItem issue : resp.getData().getResultset()) {
+                    if (issue.getId().equals(latestId)){
+                        break;
+                    }else{
+                        newIssues.add(IssueEntityConvertor.convert(issue));
+                    }
+                }
+            }
+            Files.writeString(file.toPath(),newestId);
+            if (!newIssues.isEmpty()){
+                IssueNotifyEvent event = new IssueNotifyEvent();
+                event.setNewIssues(newIssues);
+                event.setFirst(first);
+                notifyEventPublisher.publish(event);
+                log.info(jobName+" new issues:"+JsonUtil.toJson(newIssues));
+            }
+
+        } catch (IOException e) {
+            log.error(jobName+"create flag file ex:"+ ExceptionUtils.getStackTrace(e));
+        }
+    }
+
 }
