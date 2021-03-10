@@ -118,7 +118,7 @@ public class SCDataFinder {
     public List<MatchIndexEntity> autoFind(String content) {
         String keywordStr = getKeywordByPattern(content);
         if (keywordStr == null) return null;
-        List<MatchIndexEntity> matchList = indexList.stream().map(indexEntity -> {
+        List<MatchIndexEntity> matchList = indexList.parallelStream().map(indexEntity -> {
             /**
              * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
              * 先匹配中文,如果中文没匹配上,去匹配英文
