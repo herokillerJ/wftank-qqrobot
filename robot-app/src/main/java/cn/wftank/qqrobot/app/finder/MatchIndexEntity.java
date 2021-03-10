@@ -23,6 +23,6 @@ public class MatchIndexEntity extends IndexEntity{
  }
 
  public void plusMatchKeyLength(int delta){
-  if (delta != 0) matchCount.addAndGet(delta);
+  if (delta != 0) matchKeyLength.addAndGet(delta);
  }
 }
