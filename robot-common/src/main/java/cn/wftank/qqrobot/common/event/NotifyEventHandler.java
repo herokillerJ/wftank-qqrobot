@@ -23,7 +23,8 @@ public class NotifyEventHandler implements EventHandler<NotifyEventWrapper> {
             handlerMap.get(clazz.getName()).onEvent(eventWrapper.getNotifyEvent(),sequence,endOfBatch);
         }catch (Exception e){
             log.error("on event ex:"+ ExceptionUtils.getStackTrace(e));
-            throw new RuntimeException(e);
+        }finally {
+            eventWrapper.clear();
         }
     }
 

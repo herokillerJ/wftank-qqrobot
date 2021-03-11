@@ -17,8 +17,10 @@ import org.springframework.stereotype.Component;
 import us.codecraft.xsoup.XElements;
 import us.codecraft.xsoup.Xsoup;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,7 +35,7 @@ public class BaiduTiebaJob {
     private NotifyEventPublisher notifyEventPublisher;
 
 
-    @Scheduled(fixedDelay = 1000*60)
+    @Scheduled(fixedDelay = 1000*30)
     private void gLaoWatchJob(){
         String jobName = "G-LAO watch job";
         log.info(jobName+" start");
@@ -47,8 +49,8 @@ public class BaiduTiebaJob {
                 log.error(jobName+"create flag file ex:"+ ExceptionUtils.getStackTrace(e));
             }
         }
-        try {
-            String latestTitle = Files.readString(file.toPath());
+        try(BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            String latestTitle = reader.readLine();
             if (StringUtils.isBlank(latestTitle)){
                 first = true;
             }

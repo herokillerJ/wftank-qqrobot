@@ -11,4 +11,7 @@ public class NotifyEventWrapper {
     public void setNotifyEvent(NotifyEvent notifyEvent) {
         this.notifyEvent = notifyEvent;
     }
+    public void clear(){
+        this.notifyEvent = null;
+    }
 }

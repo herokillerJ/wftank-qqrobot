@@ -19,8 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +50,8 @@ public class SpectrumJob {
                 log.error(jobName+"create flag file ex:"+ ExceptionUtils.getStackTrace(e));
             }
         }
-        try {
-            String latestId = Files.readString(file.toPath());
+        try(BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            String latestId = reader.readLine();
             if (StringUtils.isBlank(latestId)){
                 first = true;
             }
