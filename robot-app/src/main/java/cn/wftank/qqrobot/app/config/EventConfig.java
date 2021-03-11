@@ -33,7 +33,7 @@ public class EventConfig {
     }
 
     @Bean
-    public EventHandler<NotifyEventWrapper> notityEventHandler(List<EventHandler> eventHandlers){
+    public EventHandler<NotifyEventWrapper> notifyEventHandler(List<EventHandler> eventHandlers){
         NotifyEventHandler.Builder builder = new NotifyEventHandler.Builder();
         eventHandlers.forEach(eventHandler -> {
             Type genericInterface = AopUtils.getTargetClass(eventHandler).getGenericInterfaces()[0];

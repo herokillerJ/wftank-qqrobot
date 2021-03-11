@@ -32,7 +32,7 @@ public class SCDataFinder {
 
     private Map<Pattern,Integer> patternMap = new LinkedHashMap<>();
     {
-        patternMap.put(Pattern.compile("(.+)(在|去|到|.*)(哪|那).*(买|卖|租|).*"),1);
+        patternMap.put(Pattern.compile("(.+)(在|去|到|)*.*(哪|那)+.*(买|卖|租|)+.*"),1);
         load();
     }
 

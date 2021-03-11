@@ -1,6 +1,9 @@
 package cn.wftank.qqrobot.app.event.handler;
 
+import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
+import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.event.issue.IssueNotifyEvent;
+import cn.wftank.qqrobot.common.util.JsonUtil;
 import com.lmax.disruptor.EventHandler;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
@@ -12,8 +15,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class IssueEventHandler implements EventHandler<IssueNotifyEvent> {
@@ -25,7 +32,25 @@ public class IssueEventHandler implements EventHandler<IssueNotifyEvent> {
 
     @Override
     public void onEvent(IssueNotifyEvent event, long sequence, boolean endOfBatch) {
-        Group group = bot.getGroup(1032374245);
+        log.info("issue event:"+ JsonUtil.toJson(event));
+        if (!bot.isOnline()){
+            log.warn("bot is offline,will login again");
+            bot.login();
+        }
+        String groupsStr = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
+        Set<Long> collect = Arrays.stream(groupsStr.split(",")).map(Long::valueOf).collect(Collectors.toSet());
+        collect.forEach(groupId -> {
+            processEachGroup(event, bot.getGroup(groupId));
+            //每个群延时发送防止被当做机器人
+            try {
+                Thread.sleep(Duration.ofSeconds(5).toMillis());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void processEachGroup(IssueNotifyEvent event, Group group) {
         List<MessageChain> dataChain = new ArrayList<>();
         event.getNewIssues().forEach(issueEntity -> {
             dataChain.add(MessageUtils.newChain()

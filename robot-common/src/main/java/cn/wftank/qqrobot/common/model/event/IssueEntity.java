@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class IssueEntity {
 
 
-    private int id;
+    private String id;
     private String title;
     private String url;
 

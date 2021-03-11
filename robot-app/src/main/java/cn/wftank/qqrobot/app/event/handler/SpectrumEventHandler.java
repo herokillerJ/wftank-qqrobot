@@ -1,6 +1,9 @@
 package cn.wftank.qqrobot.app.event.handler;
 
+import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
+import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.event.spectrum.SpectrumNotifyEvent;
+import cn.wftank.qqrobot.common.util.JsonUtil;
 import com.lmax.disruptor.EventHandler;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
@@ -13,8 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
@@ -26,21 +33,36 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
 
     @Override
     public void onEvent(SpectrumNotifyEvent event, long sequence, boolean endOfBatch) throws Exception {
-
-        switch (event.getType()){
-            case ANNOUNCEMENTS:
-                announcementNotify(event, bot);
-                break;
-            case PATCH_NOTES:
-                patchNoteNotify(event, bot);
-                break;
+        log.info("spectrum event:"+ JsonUtil.toJson(event));
+        if (!bot.isOnline()){
+            log.warn("bot is offline,will login again");
+            bot.login();
         }
-
-
+        String groupsStr = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
+        Set<Long> collect = Arrays.stream(groupsStr.split(",")).map(Long::valueOf).collect(Collectors.toSet());
+        collect.forEach(groupId -> {
+            proccessEachGroup(event, bot.getGroup(groupId));
+            //每个群延时发送防止被当做机器人
+            try {
+                Thread.sleep(Duration.ofSeconds(5).toMillis());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
-    private void patchNoteNotify(SpectrumNotifyEvent event, Bot bot) {
-        Group group = bot.getGroup(1032374245);
+    private void proccessEachGroup(SpectrumNotifyEvent event, Group group) {
+        switch (event.getType()){
+            case ANNOUNCEMENTS:
+                announcementNotify(event, group);
+                break;
+            case PATCH_NOTES:
+                patchNoteNotify(event, group);
+                break;
+        }
+    }
+
+    private void patchNoteNotify(SpectrumNotifyEvent event, Group group) {
         List<MessageChain> dataChain = new ArrayList<>();
         event.getNewThreads().forEach(spectrumThread -> {
             String version = spectrumThread.getSubject()
@@ -65,8 +87,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
         }
     }
 
-    private void announcementNotify(SpectrumNotifyEvent event, Bot bot) {
-        Group group = bot.getGroup(1032374245);
+    private void announcementNotify(SpectrumNotifyEvent event, Group group) {
         List<MessageChain> dataChain = new ArrayList<>();
         event.getNewThreads().forEach(spectrumThread -> {
             dataChain.add(MessageUtils.newChain()
