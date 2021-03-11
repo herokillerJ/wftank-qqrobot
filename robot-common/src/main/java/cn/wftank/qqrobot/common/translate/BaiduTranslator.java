@@ -9,6 +9,7 @@ import cn.wftank.qqrobot.common.util.OKHttpUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -32,6 +33,13 @@ public class BaiduTranslator implements TranslatorApi {
 
     @Override
     public String translate(String source, String from, String to) {
+        String result = "";
+        //判断是否需要翻译
+        if (StringUtils.isBlank(GlobalConfig.getConfig(ConfigKeyEnum.TRANSLATE_BAIDU_APPID))
+        || StringUtils.isBlank(GlobalConfig.getConfig(ConfigKeyEnum.TRANSLATE_BAIDU_SECRET))){
+            return result;
+        }
+
         if (log.isDebugEnabled()){
             log.debug("translate source:{},from:{},to:{}",source,from,to);
         }
@@ -42,7 +50,6 @@ public class BaiduTranslator implements TranslatorApi {
         //百度翻译会以换行符分隔,返回list,这里再拼回换行符
         BaiduTranslateResp resp = OKHttpUtil.post(URL, map, new TypeReference<BaiduTranslateResp>() {
         });
-        String result = "";
         if (null != resp.getTransResult() && !resp.getTransResult().isEmpty()){
             result = resp.getTransResult().stream().map(TransResultItem::getDst).collect(Collectors.joining("\n"));
         }
@@ -51,6 +58,12 @@ public class BaiduTranslator implements TranslatorApi {
 
     @Override
     public List<String> batchTranslate(List<String> sourceList, String from, String to) {
+        List result = new ArrayList();
+        //判断是否需要翻译
+        if (StringUtils.isBlank(GlobalConfig.getConfig(ConfigKeyEnum.TRANSLATE_BAIDU_APPID))
+                || StringUtils.isBlank(GlobalConfig.getConfig(ConfigKeyEnum.TRANSLATE_BAIDU_SECRET))){
+            return result;
+        }
         if (log.isDebugEnabled()){
             log.debug("translate source:{},from:{},to:{}",sourceList,from,to);
         }
@@ -61,7 +74,6 @@ public class BaiduTranslator implements TranslatorApi {
         //百度翻译会以换行符分隔,返回list,这里再拼回换行符
         BaiduTranslateResp resp = OKHttpUtil.post(URL, map, new TypeReference<BaiduTranslateResp>() {
         });
-        List result = new ArrayList();
         if (null != resp.getTransResult() && !resp.getTransResult().isEmpty()){
             List<TransResultItem> transResult = resp.getTransResult();
             result = transResult.stream().map(transResultItem -> transResultItem.getDst().replaceAll(LINE_SEPARATOR,"\n"))
