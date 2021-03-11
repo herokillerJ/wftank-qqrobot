@@ -4,13 +4,10 @@ package cn.wftank.qqrobot.common;
 import cn.wftank.qqrobot.common.util.JsonUtil;
 import cn.wftank.qqrobot.common.util.OKHttpUtil;
 import cn.wftank.qqrobot.schedule.model.vo.request.spectrum.SpectrumAnnouncementsReq;
-import cn.wftank.qqrobot.schedule.model.vo.response.spectrum.RespData;
 import cn.wftank.qqrobot.schedule.model.vo.response.spectrum.SpectrumResp;
 import cn.wftank.qqrobot.schedule.model.vo.response.spectrum.ThreadsItem;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit test for simple App.
@@ -26,7 +23,7 @@ public class HtmlTest
         req.setChannelId(1);
         req.setPage(1);
         req.setSort("newest");
-        SpectrumResp<ThreadsItem> resp = OKHttpUtil.post("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
+        SpectrumResp<ThreadsItem> resp = OKHttpUtil.postJson("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
                 , req, new TypeReference<SpectrumResp<ThreadsItem>>() {});
         System.out.println(JsonUtil.toJson(resp));
     }
@@ -37,7 +34,7 @@ public class HtmlTest
         req.setChannelId(1);
         req.setPage(1);
         req.setSort("newest");
-        SpectrumResp<ThreadsItem> resp = OKHttpUtil.post("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
+        SpectrumResp<ThreadsItem> resp = OKHttpUtil.postJson("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
                 , req, new TypeReference<SpectrumResp<ThreadsItem>>() {});
         System.out.println(JsonUtil.toJson(resp));
     }

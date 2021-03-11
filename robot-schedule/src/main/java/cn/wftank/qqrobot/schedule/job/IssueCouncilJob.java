@@ -10,6 +10,7 @@ import cn.wftank.qqrobot.schedule.model.vo.request.issue.IssueCouncilReq;
 import cn.wftank.qqrobot.schedule.model.vo.response.issue.IssueCouncilResp;
 import cn.wftank.qqrobot.schedule.model.vo.response.issue.ResultsetItem;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Setter
 public class IssueCouncilJob {
 
     private static final Logger log = LoggerFactory.getLogger(IssueCouncilJob.class);
@@ -33,7 +35,7 @@ public class IssueCouncilJob {
     private NotifyEventPublisher notifyEventPublisher;
 
     @Scheduled(fixedDelay = 1000*60)
-    private void issueCouncilWatchJob(){
+    public void issueCouncilWatchJob(){
         String jobName = "issue council watch job";
         log.info(jobName+" start");
         File file = new File("./issue_council_flag.txt");
@@ -56,7 +58,7 @@ public class IssueCouncilJob {
             req.setPagesize(10);
             req.setSort("newest");
             req.setModuleUrl("star-citizen-alpha-3");
-            IssueCouncilResp resp = OKHttpUtil.post("https://robertsspaceindustries.com/community/issue-council/api/issue/list"
+            IssueCouncilResp resp = OKHttpUtil.postJson("https://robertsspaceindustries.com/community/issue-council/api/issue/list"
                     , req, new TypeReference<IssueCouncilResp>() {});
             List<IssueEntity> newIssues = new ArrayList<>();
             ResultsetItem firstIssue = resp.getData().getResultset().get(0);
@@ -87,6 +89,10 @@ public class IssueCouncilJob {
         } catch (IOException e) {
             log.error(jobName+"create flag file ex:"+ ExceptionUtils.getStackTrace(e));
         }
+    }
+
+
+    public static void main(String[] args) {
     }
 
 }

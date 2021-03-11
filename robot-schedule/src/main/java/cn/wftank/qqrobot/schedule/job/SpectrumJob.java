@@ -57,7 +57,7 @@ public class SpectrumJob {
             req.setChannelId(1);
             req.setPage(1);
             req.setSort("newest");
-            SpectrumResp<ThreadsItem> resp = OKHttpUtil.post("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
+            SpectrumResp<ThreadsItem> resp = OKHttpUtil.postJson("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
                     , req, new TypeReference<SpectrumResp<ThreadsItem>>() {});
             List<SpectrumThread> newThreads = new ArrayList<>();
             ThreadsItem firstThread = resp.getRespData().getThreads().get(0);
@@ -115,7 +115,7 @@ public class SpectrumJob {
             req.setChannelId(190048);
             req.setPage(1);
             req.setSort("newest");
-            SpectrumResp<ThreadsItem> resp = OKHttpUtil.post("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
+            SpectrumResp<ThreadsItem> resp = OKHttpUtil.postJson("https://robertsspaceindustries.com/api/spectrum/forum/channel/threads"
                     , req, new TypeReference<SpectrumResp<ThreadsItem>>() {});
             List<SpectrumThread> newThreads = new ArrayList<>();
             ThreadsItem firstThread = resp.getRespData().getThreads().get(0);

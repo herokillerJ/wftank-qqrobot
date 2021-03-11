@@ -1,5 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:mysql://193.160.32.228:4417/wftank?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&socketTimeout=40000&serverTimezone=GMT%2B8
-    username: wftank
-    password: JWhyydkl1994

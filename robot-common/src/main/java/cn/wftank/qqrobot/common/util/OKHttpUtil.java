@@ -8,14 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: jiawei
+ * @author: wftank
  * @create: 2021-01-07 16:59
  * @description: OKhttp工具类
  **/
@@ -49,7 +49,7 @@ public class OKHttpUtil {
                 .build();
     }
 
-    public static <T> T post(String url,Object jsonBody,TypeReference<T> typeReference) {
+    public static <T> T postJson(String url, Object jsonBody, TypeReference<T> typeReference) {
         RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, JsonUtil.toJson(jsonBody)); // new
         Request request = new Request.Builder()
                 .url(url)
@@ -63,7 +63,49 @@ public class OKHttpUtil {
            }
             return JsonUtil.parseJson(respStr,typeReference);
         } catch (IOException e) {
-            log.equals("request exception:"+ ExceptionUtils.getStackTrace(e));
+            log.error("request exception:"+ ExceptionUtils.getStackTrace(e));
+        }
+        return null;
+    }
+
+    public static <T> T post(String url, Map<String,String> bodyMap, TypeReference<T> typeReference) {
+        FormBody.Builder builder = new FormBody.Builder();
+        bodyMap.forEach((key,val) -> builder.add(key,val));
+        FormBody formBody = builder.build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            String respStr = response.body().string();
+            if (log.isDebugEnabled()){
+                log.debug("resp:"+respStr);
+            }
+            return JsonUtil.parseJson(respStr,typeReference);
+        } catch (IOException e) {
+            log.error("request exception:"+ ExceptionUtils.getStackTrace(e));
+        }
+        return null;
+    }
+
+    public static String post(String url, Map<String,String> bodyMap) {
+        FormBody.Builder builder = new FormBody.Builder();
+        bodyMap.forEach((key,val) -> builder.add(key,val));
+        FormBody formBody = builder.build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            String respStr = response.body().string();
+            if (log.isDebugEnabled()){
+                log.debug("resp:"+respStr);
+            }
+            return respStr;
+        } catch (IOException e) {
+            log.error("request exception:"+ ExceptionUtils.getStackTrace(e));
         }
         return null;
     }
@@ -81,7 +123,7 @@ public class OKHttpUtil {
             }
             return JsonUtil.parseJson(respStr,typeReference);
         } catch (IOException e) {
-            log.equals("request exception:"+ ExceptionUtils.getStackTrace(e));
+            log.error("request exception:"+ ExceptionUtils.getStackTrace(e));
         }
         return null;
     }

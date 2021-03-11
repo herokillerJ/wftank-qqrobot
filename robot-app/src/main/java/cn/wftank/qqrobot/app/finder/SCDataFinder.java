@@ -32,7 +32,7 @@ public class SCDataFinder {
 
     private Map<Pattern,Integer> patternMap = new LinkedHashMap<>();
     {
-        patternMap.put(Pattern.compile("(.+)(在|去|到|.*)(哪|那).*(买|卖|租|).*"),1);
+        patternMap.put(Pattern.compile("(.+)(在|去|到|)*.*(哪|那)+.*(买|卖|租)+.*"),1);
         load();
     }
 
@@ -118,17 +118,17 @@ public class SCDataFinder {
     public List<MatchIndexEntity> autoFind(String content) {
         String keywordStr = getKeywordByPattern(content);
         if (keywordStr == null) return null;
-        List<MatchIndexEntity> matchList = indexList.parallelStream().map(indexEntity -> {
+        List<MatchIndexEntity> matchList = indexList.stream().map(indexEntity -> {
             /**
              * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
              * 先匹配中文,如果中文没匹配上,去匹配英文
              */
             MatchIndexEntity matchIndexEntity = matchCn(keywordStr, indexEntity);
-            if (matchIndexEntity.getMatchCount().get() < 1 && matchIndexEntity.getMatchKeyLength().get() < 2) {
+            if (matchIndexEntity.getMatchCount().get() < 1) {
                 matchIndexEntity = match(keywordStr, indexEntity);
             }
             return matchIndexEntity;
-        }).filter(matchIndexEntity -> matchIndexEntity.getMatchCount().get() > 0 || matchIndexEntity.getMatchKeyLength().get() > 1)
+        }).filter(matchIndexEntity -> matchIndexEntity.getMatchCount().get() > 0 || matchIndexEntity.getMatchKeyLength().get() > 0)
                 .sorted((match1, match2) -> {
                     //匹配的关键字长度越长的在前面
                     int wordNum = match2.getMatchKeyLength().get() - match1.getMatchKeyLength().get();
@@ -147,6 +147,11 @@ public class SCDataFinder {
                     }
                 }).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(matchList)){
+//            matchList = matchList.stream().sorted((m1,m2) -> {
+//                int m1ScoreCn = commonLenghScore(keywordStr, m1.getNameCn());
+//                int m2ScoreCn = commonLenghScore(keywordStr, m2.getNameCn());
+//                return m2ScoreCn-m1ScoreCn;
+//            }).collect(Collectors.toList());
             int maxMatchCount = matchList.get(0).getMatchCount().get();
             matchList = matchList.stream()
                     .filter(entiy -> entiy.getMatchCount().get() == maxMatchCount)
@@ -165,27 +170,22 @@ public class SCDataFinder {
         //将商品根据空格切开(比如:先锋 哨兵)
         String[] nameCnKeywords = indexEntity.getNameCn()
                 //去掉所有除空格外的符号
-                .replaceAll("\\p{Punct}|\\d","")
+//                .replaceAll("\\p{Punct}|\\d","")
+                //所有的符号都变成空格
+                .replaceAll("[\\pP‘’“”]"," ")
                 .split(" ");
+        List<String> nameCnKeywordsList = Arrays.stream(nameCnKeywords).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         //匹配次数
-        for (int i = 0; i < nameCnKeywords.length; i++) {
-            String nameKeyword = nameCnKeywords[i];
+        for (String nameKeyword : nameCnKeywordsList) {
             //根据横杠再切开比如cf-117
             if (nameKeyword.indexOf("_")> -1){
                 String[] nameKeywordPart = nameKeyword.split("-");
                 for (int j = 0; j < nameKeywordPart.length; j++) {
-                    if (keywordStr.toLowerCase().contains(nameKeywordPart[j].toLowerCase())) {
-                        matchIndexEntity.plusMatchCount();
-                        matchIndexEntity.plusMatchKeyLength(nameKeywordPart[j].length());
-                    };
+                    matchRankCn(matchIndexEntity, keywordStr, nameKeywordPart[j]);
                 }
             }else{
-                if (keywordStr.toLowerCase().contains(nameKeyword.toLowerCase())) {
-                    matchIndexEntity.plusMatchCount();
-                    matchIndexEntity.plusMatchKeyLength(nameKeyword.length());
-                };
+                matchRankCn(matchIndexEntity, keywordStr, nameKeyword);
             }
-
         }
         if (matchIndexEntity.getMatchCount().get() == 0){
             //匹配相同的最长子串,先匹配中文,如果中文不匹配就匹配英文
@@ -194,6 +194,25 @@ public class SCDataFinder {
         }
         BeanUtils.copyProperties(indexEntity, matchIndexEntity);
         return matchIndexEntity;
+    }
+
+    private void matchRankCn(MatchIndexEntity matchIndexEntity, String keywordStr, String nameKeyword) {
+        keywordStr = keywordStr.toLowerCase();
+        nameKeyword = nameKeyword.toLowerCase();
+        if (keywordStr.contains(nameKeyword)) {
+            matchIndexEntity.plusMatchCount();
+            matchIndexEntity.plusMatchKeyLength(nameKeyword.length());
+        }
+
+    }
+
+    private void matchRank(MatchIndexEntity matchIndexEntity, String keywordStr, String nameKeyword) {
+        keywordStr = keywordStr.toLowerCase();
+        nameKeyword = nameKeyword.toLowerCase();
+        if (keywordStr.contains(nameKeyword)) {
+            matchIndexEntity.plusMatchCount();
+            matchIndexEntity.plusMatchKeyLength(nameKeyword.length());
+        }
     }
 
 
@@ -206,27 +225,22 @@ public class SCDataFinder {
         //将商品根据空格切开(比如:先锋 哨兵)
         String[] nameKeywords = indexEntity.getName()
                 //去掉所有除空格外的符号
-                .replaceAll("\\p{Punct}|\\d","")
+                .replaceAll("[\\pP‘’“”]"," ")
                 .split(" ");
+        List<String> nameKeywordsList = Arrays.stream(nameKeywords).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         //匹配次数
-        for (int i = 0; i < nameKeywords.length; i++) {
-            String nameKeyword = nameKeywords[i];
+        for (String nameKeyword : nameKeywordsList) {
             //根据横杠再切开比如cf-117
             if (nameKeyword.indexOf("_")> -1){
                 String[] nameKeywordPart = nameKeyword.split("-");
                 for (int j = 0; j < nameKeywordPart.length; j++) {
-                    if (keywordStr.toLowerCase().contains(nameKeywordPart[j].toLowerCase())) {
-                        matchIndexEntity.plusMatchCount();
-                        matchIndexEntity.plusMatchKeyLength(nameKeywordPart[j].length());
-                    };
+                    matchRank(matchIndexEntity, keywordStr, nameKeywordPart[j]);
+                    ;
                 }
             }else{
-                if (keywordStr.toLowerCase().contains(nameKeyword.toLowerCase())) {
-                    matchIndexEntity.plusMatchCount();
-                    matchIndexEntity.plusMatchKeyLength(nameKeyword.length());
-                };
+                matchRank(matchIndexEntity, keywordStr, nameKeyword);
+                ;
             }
-
         }
         if (matchIndexEntity.getMatchCount().get() == 0){
             //匹配相同的最长子串,先匹配中文,如果中文不匹配就匹配英文
@@ -247,6 +261,16 @@ public class SCDataFinder {
             }
         }
         return null;
+    }
+
+    public static int commonLenghScore(String s1, String s2){
+        int score = 0;
+        String common = longestCommonSubstring(s1, s2);
+        if (StringUtils.isNotBlank(common) && common.length() > 2){
+            score = common.length();
+            score += commonLenghScore(s1.replaceAll(common,""),s2.replaceAll(common,""));
+        }
+        return score;
     }
     //找出最长相同的字符串
     public static String longestCommonSubstring(String S1, String S2)
