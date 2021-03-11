@@ -35,7 +35,7 @@ public class BaiduTiebaJob {
     private NotifyEventPublisher notifyEventPublisher;
 
 
-    @Scheduled(fixedDelay = 1000*30)
+    @Scheduled(fixedDelay = 1000*60)
     private void gLaoWatchJob(){
         String jobName = "G-LAO watch job";
         log.info(jobName+" start");
