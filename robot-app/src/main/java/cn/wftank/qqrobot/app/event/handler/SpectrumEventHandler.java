@@ -3,6 +3,7 @@ package cn.wftank.qqrobot.app.event.handler;
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.event.spectrum.SpectrumNotifyEvent;
+import cn.wftank.qqrobot.common.translate.BaiduTranslator;
 import cn.wftank.qqrobot.common.util.JsonUtil;
 import com.lmax.disruptor.EventHandler;
 import net.mamoe.mirai.Bot;
@@ -30,6 +31,8 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
 
     @Autowired
     private Bot bot;
+    @Autowired
+    private BaiduTranslator baiduTranslator;
 
     @Override
     public void onEvent(SpectrumNotifyEvent event, long sequence, boolean endOfBatch) throws Exception {
@@ -91,7 +94,8 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
         List<MessageChain> dataChain = new ArrayList<>();
         event.getNewThreads().forEach(spectrumThread -> {
             dataChain.add(MessageUtils.newChain()
-                    .plus("标题："+spectrumThread.getSubject()+"\n")
+                    .plus("标题："+spectrumThread.getSubject())
+                    .plus("("+baiduTranslator.translate(spectrumThread.getSubject(),"en","zh")+")\n")
                     .plus("链接："+spectrumThread.getUrl()+"\n")
             );
         });
