@@ -29,10 +29,19 @@ public class RobotConfig {
 
     @Bean
     public Bot bot(QQEventHandlers qqEventHandlers){
+        String miraiProtocol = GlobalConfig.getConfig(ConfigKeyEnum.MIRAI_PROTOCOL);
+        //默认手机登录
+        if (StringUtils.isBlank(miraiProtocol)){
+            miraiProtocol = "ANDROID_PHONE";
+        }
+        BotConfiguration.MiraiProtocol protocol = BotConfiguration.MiraiProtocol.valueOf(miraiProtocol);
+        protocol = protocol == null ? BotConfiguration.MiraiProtocol.ANDROID_PHONE : protocol;
+
+        BotConfiguration.MiraiProtocol finalProtocol = protocol;
         Bot bot = BotFactory.INSTANCE.newBot(Long.valueOf(GlobalConfig.getConfig(ConfigKeyEnum.QQ)),
                 GlobalConfig.getConfig(ConfigKeyEnum.PASSWORD),new BotConfiguration() {{
             fileBasedDeviceInfo(); // 使用 device.json 存储设备信息
-            setProtocol(MiraiProtocol.ANDROID_PHONE); // 切换协议
+            setProtocol(finalProtocol); // 切换协议
             File workDir = new File("./qqbot");
             if (!workDir.exists()){
                 try {

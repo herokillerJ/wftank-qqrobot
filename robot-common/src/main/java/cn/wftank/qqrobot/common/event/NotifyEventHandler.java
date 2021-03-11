@@ -22,7 +22,7 @@ public class NotifyEventHandler implements EventHandler<NotifyEventWrapper> {
     public static class Builder{
         private Map<Class<? extends NotifyEvent>, EventHandler> handlerMap = new HashMap<>();
 
-        public void addEventHandler(Class<? extends NotifyEvent> clazz, EventHandler eventHandler){
+        public void addEventHandler(Class<? extends NotifyEvent> clazz, EventHandler<? extends NotifyEvent> eventHandler){
             handlerMap.put(clazz,eventHandler);
         }
 
