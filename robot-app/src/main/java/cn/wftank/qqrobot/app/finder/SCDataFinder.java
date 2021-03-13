@@ -1,6 +1,8 @@
 package cn.wftank.qqrobot.app.finder;
 
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
+import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
+import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.util.OKHttpUtil;
 import cn.wftank.qqrobot.common.util.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -9,15 +11,11 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import info.debatty.java.stringsimilarity.MetricLCS;
 import info.debatty.java.stringsimilarity.interfaces.StringDistance;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -50,8 +48,8 @@ public class SCDataFinder {
 
     @Scheduled(fixedDelay = 1000*60*60)
     private void load(){
-        String indexUrl = URL_PREFIX+getVersion()+"/index.json";
-        String extIndexUrl = URL_PREFIX+getVersion()+"/ext_index.json";
+        String indexUrl = URL_PREFIX+ GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION) +"/index.json";
+        String extIndexUrl = URL_PREFIX+GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION)+"/ext_index.json";
         Index index = OKHttpUtil.get(indexUrl, new TypeReference<Index>() {});
         List<IndexEntity> mainList = index.getIndex();
         Index extIndex = OKHttpUtil.get(extIndexUrl, new TypeReference<Index>() {});
@@ -99,28 +97,12 @@ public class SCDataFinder {
         return match2.getNameCn().length() - match1.getNameCn().length();
     }
 
-    public String getVersion(){
-        try {
-            File file = new File("./sc_database_version");
-            if (!file.exists()){
-                Files.createFile(file.toPath());
-            }
-            String version = Files.readString(file.toPath());
-            if (StringUtils.isNotBlank(version)){
-                return version;
-            }
-        }catch (IOException e){
-            log.error("get sc_database_version ex"+ ExceptionUtils.getStackTrace(e));
-        }
-        return DEFAULT_VERSION;
-    }
-
     public JsonProductVO getProductInfo(String path){
         return productCache.get(path);
     }
 
     public JsonProductVO loadProductInfo(String path){
-        String url = URL_PREFIX+getVersion()+"/"+path;
+        String url = URL_PREFIX+GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION)+"/"+path;
         JsonProductVO productVO = OKHttpUtil.get(url, new TypeReference<JsonProductVO>() {
         });
         return productVO;

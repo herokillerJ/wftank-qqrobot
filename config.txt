@@ -1,3 +1,5 @@
+#wftank的星际公民数据库版本,默认最新版(latest),如需指定版本,参考https://cdn.jsdelivr.net/gh/herokillerJ/starcitizen-data/
+sc.database.version=latest
 #qq号
 qq=机器人的QQ号
 #QQ密码

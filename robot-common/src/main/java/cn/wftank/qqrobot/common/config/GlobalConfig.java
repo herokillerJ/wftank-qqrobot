@@ -46,10 +46,6 @@ public class GlobalConfig {
 
     }
 
-    public static void main(String[] args) {
-        System.out.println(getConfig(ConfigKeyEnum.PASSWORD));
-    }
-
     public static void checkConfig() throws FileNotFoundException {
         File file = new File(CONFIG_PATH);
         if (!file.exists()){

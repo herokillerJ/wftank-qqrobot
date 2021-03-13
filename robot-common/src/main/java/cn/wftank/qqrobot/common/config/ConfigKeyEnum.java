@@ -15,6 +15,7 @@ public enum ConfigKeyEnum{
         QQ("qq"),
         PASSWORD("password"),
         GROUPS("groups"),
+        SC_DB_VERSION("sc.database.version"),
         MIRAI_PROTOCOL("mirai.protocol"),
         //翻译
         TRANSLATE_BAIDU_APPID("translate.baidu.appid"),
