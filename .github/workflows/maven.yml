@@ -32,7 +32,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} #内置变量,无需手动添加
       with:
         tag_name: ${{ github.ref }}  #参考https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-        release_name: Release ${{ github.ref }}
+        release_name: ${{ github.ref }}
         draft: false
         prerelease: false
     - name: Upload Release
