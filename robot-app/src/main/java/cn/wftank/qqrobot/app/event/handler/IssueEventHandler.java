@@ -4,6 +4,7 @@ import cn.wftank.qqrobot.app.mirai.QQGroupMessageSender;
 import cn.wftank.qqrobot.common.event.issue.IssueNotifyEvent;
 import cn.wftank.qqrobot.common.translate.BaiduTranslator;
 import cn.wftank.qqrobot.common.util.JsonUtil;
+import cn.wftank.qqrobot.common.util.StringUtils;
 import com.lmax.disruptor.EventHandler;
 import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.MessageChain;
@@ -42,8 +43,7 @@ public class IssueEventHandler implements EventHandler<IssueNotifyEvent> {
             List<MessageChain> dataChain = new ArrayList<>();
             event.getNewIssues().forEach(issueEntity -> {
                 dataChain.add(MessageUtils.newChain()
-                        .plus("标题："+issueEntity.getTitle())
-                        .plus("("+baiduTranslator.translate(issueEntity.getTitle(),"en","zh")+")\n")
+                        .plus("标题："+ formatAndTranslateTitle(issueEntity.getTitle())+"\n")
                         .plus("链接："+issueEntity.getUrl()+"\n")
                 );
             });
@@ -52,6 +52,15 @@ public class IssueEventHandler implements EventHandler<IssueNotifyEvent> {
                     .plus(dataChain);
         }
         qqGroupSender.sendMessageForAllGroups(chain);
+    }
+
+    private String formatAndTranslateTitle(String title) {
+        String result = title;
+        String translate = baiduTranslator.translate(title, "en", "zh");
+        if (StringUtils.isNotBlank(translate)){
+            result = "("+translate+")";
+        }
+        return result;
     }
 
 

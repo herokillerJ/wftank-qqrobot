@@ -4,6 +4,7 @@ import cn.wftank.qqrobot.app.mirai.QQGroupMessageSender;
 import cn.wftank.qqrobot.common.event.spectrum.SpectrumNotifyEvent;
 import cn.wftank.qqrobot.common.translate.BaiduTranslator;
 import cn.wftank.qqrobot.common.util.JsonUtil;
+import cn.wftank.qqrobot.common.util.StringUtils;
 import com.lmax.disruptor.EventHandler;
 import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.MessageChain;
@@ -71,8 +72,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
         List<MessageChain> dataChain = new ArrayList<>();
         event.getNewThreads().forEach(spectrumThread -> {
             dataChain.add(MessageUtils.newChain()
-                    .plus("标题："+spectrumThread.getSubject())
-                    .plus("("+baiduTranslator.translate(spectrumThread.getSubject(),"en","zh")+")\n")
+                    .plus("标题："+formatAndTranslateTitle(spectrumThread.getSubject()))
                     .plus("链接："+spectrumThread.getUrl()+"\n")
             );
         });
@@ -88,5 +88,14 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
         }
         //发送消息
         qqGroupSender.sendMessageForAllGroups(chain);
+    }
+
+    private String formatAndTranslateTitle(String title) {
+        String result = title;
+        String translate = baiduTranslator.translate(title, "en", "zh");
+        if (StringUtils.isNotBlank(translate)){
+            result = "("+translate+")";
+        }
+        return result;
     }
 }
