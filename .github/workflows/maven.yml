@@ -48,5 +48,6 @@ jobs:
       uses: wei/rclone@v1
       env:
         RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+      run: mv ./wftank-qqrobot.zip wftank-qqrobot-${{ steps.create_release.outputs.tag }}.zip
       with:
-        args: copy ./wftank-qqrobot.zip remote:/wftank-qqrobot/wftank-qqrobot-${{ steps.create_release.outputs.tag }}.zip
+        args: copy ./wftank-qqrobot-${{ steps.create_release.outputs.tag }}.zip remote:/wftank-qqrobot
