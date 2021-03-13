@@ -27,7 +27,7 @@ jobs:
     - name: package
       run: |
         mv robot-app/target/*.jar wftank-qqrobot.jar
-        zip wftank-qqrobot.zip config.txt README.md wftank-qqrobot.jar
+        zip wftank-qqrobot.zip config.txt release_note.md README.md wftank-qqrobot.jar
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
