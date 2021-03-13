@@ -8,7 +8,6 @@ import com.lmax.disruptor.EventHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.message.data.AtAll;
 import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageUtils;
@@ -65,7 +64,6 @@ public class TiebaEventHandler implements EventHandler<TiebaNotifyEvent> {
             );
         }else{
             group.sendMessage(MessageUtils.newChain()
-                    .plus(AtAll.INSTANCE)
                     .plus(event.getAuthorName()+"发布新帖子啦！").plus(new Face(Face.ZHENG_YAN).plus("\n"))
                     .plus(dataChain)
             );

@@ -103,6 +103,7 @@ public class BaiduTranslator implements TranslatorApi {
         map.put("appid",appId);
         map.put("salt",salt);
         map.put("sign",sign);
+        map.put("action","1");
         return map;
     }
 
