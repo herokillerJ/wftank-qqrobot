@@ -23,7 +23,8 @@ jobs:
       run: mvn -B package -Dmaven.test.skip=true --file pom.xml
     - name: package
       run: |
-        zip wftank-qqrobot.zip config.txt README.md robot-app/target/*.jar
+        mv robot-app/target/*.jar wftank-qqrobot.jar
+        zip wftank-qqrobot.zip config.txt README.md wftank-qqrobot.jar
     - name: Create Release
       id: create_release
       uses: monkeyWie/create-release@master
