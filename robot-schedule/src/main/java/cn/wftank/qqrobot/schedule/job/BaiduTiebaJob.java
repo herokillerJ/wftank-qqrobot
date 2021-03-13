@@ -79,6 +79,8 @@ public class BaiduTiebaJob {
             List<TiebaThread> newThreads = new ArrayList<>();
             TiebaThread firstThread = threads.get(0);
             String newestTitle = firstThread.getTitle();
+            //xpath选择有时会出问题导致所有选择器都是空,这里做下过滤
+            if (StringUtils.isBlank(newestTitle)) return;
             if (first){
                 TiebaThread tiebaThread = threads.get(0);
                 newThreads.add(tiebaThread);
@@ -90,7 +92,9 @@ public class BaiduTiebaJob {
                     if (thread.getTitle().equals(latestTitle)){
                         break;
                     }else{
-                        newThreads.add(thread);
+                        if (StringUtils.isNotBlank(newestTitle)){
+                            newThreads.add(thread);
+                        }
                     }
                 }
             }
