@@ -116,7 +116,7 @@ public class QQEventHandlers extends SimpleListenerHost {
 
     private void processCommand(@NotNull GroupMessageEvent event, String content) {
         boolean isCommand = false;
-        if (content.startsWith("/")){
+        if (content.startsWith("-")){
             isCommand = true;
         }
         if (isCommand){
@@ -136,16 +136,16 @@ public class QQEventHandlers extends SimpleListenerHost {
                 final QuoteReply quote = new QuoteReply(event.getSource());
                 event.getGroup().sendMessage(quote
                         .plus("小助手仅支持以下指令哦~\n")
-                        .plus("/s 查找物品 模糊匹配: /s 小矿 精确匹配: /s {小矿}\n"));
+                        .plus("-s 查找物品 模糊匹配: -s 小矿 精确匹配: /s {小矿}\n"));
             }else{
                 final QuoteReply quote = new QuoteReply(event.getSource());
                 event.getGroup().sendMessage(quote
-                        .plus("请使用/help查看小助手支持的指令"));
+                        .plus("请使用-help查看小助手支持的指令"));
             }
         }else{
             final QuoteReply quote = new QuoteReply(event.getSource());
             event.getGroup().sendMessage(quote
-                    .plus("请使用/help查看小助手支持的指令"));
+                    .plus("请使用-help查看小助手支持的指令"));
         }
     }
 
