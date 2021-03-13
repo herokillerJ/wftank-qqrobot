@@ -21,18 +21,22 @@ jobs:
         java-version: 11
     - name: Build with Maven
       run: mvn -B package -Dmaven.test.skip=true --file pom.xml
+    - name: Get Version
+      id: get_version
+      uses: battila7/get-version-action@v2
     - name: package
       run: |
         mv robot-app/target/*.jar wftank-qqrobot.jar
         zip wftank-qqrobot.zip config.txt README.md wftank-qqrobot.jar
     - name: Create Release
       id: create_release
-      uses: monkeyWie/create-release@master
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} #内置变量,无需手动添加
       with:
         tag_name: ${{ github.ref }}  #参考https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         release_name: ${{ github.ref }}
+        body_path: release_note.md
         draft: false
         prerelease: false
     - name: Upload Release
@@ -42,12 +46,13 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
         asset_path: ./wftank-qqrobot.zip
-        asset_name: wftank-qqrobot-${{ steps.create_release.outputs.tag }}.zip
+        asset_name: wftank-qqrobot-${{ steps.get_version.outputs.version }}.zip
         asset_content_type: application/zip
+    - name: Rename File
+      run: mv ./wftank-qqrobot.zip wftank-qqrobot-${{ steps.get_version.outputs.version }}.zip
     - name: rclone
       uses: wei/rclone@v1
       env:
         RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
-      run: mv ./wftank-qqrobot.zip wftank-qqrobot-${{ steps.create_release.outputs.tag }}.zip
       with:
-        args: copy ./wftank-qqrobot-${{ steps.create_release.outputs.tag }}.zip remote:/wftank-qqrobot
+        args: copy ./wftank-qqrobot-${{ steps.get_version.outputs.version }}.zip remote:/wftank-qqrobot
