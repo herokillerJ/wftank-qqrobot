@@ -5,9 +5,8 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -23,9 +22,24 @@ jobs:
     - name: Build with Maven
       run: mvn -B package -Dmaven.test.skip=true --file pom.xml
     - name: package
-      run: mkdir staging && cp robot-app/target/*.jar staging
-    - name: upload-artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: Package
-        path: staging
+      run: |
+        zip wftank-qqrobot.zip config.txt README.md robot-app/target/*.jar
+    - name: Create Release
+        id: create_release
+        uses: monkeyWie/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+    - name: Upload Release
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./wftank-qqrobot.zip.zip
+          asset_name: wftank-qqrobot-${{ steps.create_release.outputs.tag }}.zip
+          asset_content_type: application/zip

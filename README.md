@@ -1,4 +1,4 @@
-#星际公民 QQ群助手
+# 星际公民 QQ群助手
 基于开源项目 https://github.com/mamoe/mirai
 ，感谢该项目的所有贡献者
 ## 功能
