@@ -6,7 +6,7 @@ name: Java CI with Maven
 on:
   push:
     tags:
-      - "v*"
+      - "v*" #提交tag时触发
 
 jobs:
   build:
@@ -28,9 +28,9 @@ jobs:
         id: create_release
         uses: monkeyWie/create-release@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} #内置变量,无需手动添加
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ github.ref }}  #参考https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
