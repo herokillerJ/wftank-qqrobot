@@ -94,7 +94,7 @@ public class SpectrumEventHandler implements EventHandler<SpectrumNotifyEvent> {
         String result = title;
         String translate = baiduTranslator.translate(title, "en", "zh");
         if (StringUtils.isNotBlank(translate)){
-            result = "("+translate+")";
+            result = title+"("+translate+")";
         }
         return result;
     }
