@@ -7,6 +7,7 @@ import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.app.model.vo.ProductRentShopVO;
 import cn.wftank.qqrobot.app.model.vo.ProductShopVO;
 import kotlin.coroutines.CoroutineContext;
+import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -27,11 +29,22 @@ public class QQEventHandlers extends SimpleListenerHost {
     private static final Logger log = LoggerFactory.getLogger(QQEventHandlers.class);
     @Autowired
     private SCDataFinder scDataFinder;
+    @Autowired
+    private Bot bot;
 
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception){
         // 处理事件处理时抛出的异常
     }
+
+    //5秒检查一次机器人登录状态,防止断线
+    @Scheduled(fixedRate = 5000)
+    private void robotHealthCheck(){
+     if (!bot.isOnline()){
+         bot.login();
+     }
+    }
+
     @EventHandler
     public void onMessage(@NotNull GroupMessageEvent event) throws Exception { // 可以抛出任何异常, 将在 handleException 处理
         MessageChain messageChain = event.getMessage();
