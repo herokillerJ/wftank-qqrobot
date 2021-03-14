@@ -39,6 +39,13 @@
     <dependency>
       <groupId>net.mamoe</groupId>
       <artifactId>mirai-core-jvm</artifactId>
+      <exclusions>
+        <!--dev版本在某些镜像仓库无法下载-->
+        <exclusion>
+          <groupId>net.mamoe</groupId>
+          <artifactId>kotlin-jvm-blocking-bridge-jvm</artifactId>
+        </exclusion>
+      </exclusions>
       <version>2.4.0</version> <!-- 替换版本为你需要的版本 -->
     </dependency>
     <dependency>
