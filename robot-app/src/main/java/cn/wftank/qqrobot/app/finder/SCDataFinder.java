@@ -122,8 +122,7 @@ public class SCDataFinder {
                     || StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getName()).length() > 0)
                 .map(indexEntity -> {
                     /**
-                     * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
-                     * 先匹配中文,如果中文没匹配上,去匹配英文
+                     * MetricLCS 匹配字符串
                      */
                     MatchIndexEntity matchIndexEntity = match(keywordStr, indexEntity);
                     return matchIndexEntity;
