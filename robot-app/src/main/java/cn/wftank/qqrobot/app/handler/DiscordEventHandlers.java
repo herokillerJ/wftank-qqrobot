@@ -15,6 +15,7 @@ public class DiscordEventHandlers {
     @DiscordEventListener
     public Mono<Message> listen(MessageCreateEvent messageCreateEvent) {
         Message msg = messageCreateEvent.getMessage();
+        log.info(msg.getContent());
         return Mono.empty();
     }
 

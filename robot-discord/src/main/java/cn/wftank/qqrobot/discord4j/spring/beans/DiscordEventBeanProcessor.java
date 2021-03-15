@@ -33,13 +33,18 @@ public class DiscordEventBeanProcessor implements BeanPostProcessor {
         this.eventDispatcher = eventDispatcher;
     }
 
+    /**
+     * 注册discord事件监听器
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         ReflectionUtils.doWithMethods(bean.getClass(), method -> {
-            if (method.isAnnotationPresent(DiscordEventListener.class)) {
-                doDiscordEventListener(method, bean);
-            }
-        });
+            doDiscordEventListener(method, bean);
+        },method -> method.isAnnotationPresent(DiscordEventListener.class));
 
         return bean;
     }
@@ -59,8 +64,8 @@ public class DiscordEventBeanProcessor implements BeanPostProcessor {
 
     private void doEvent(Method method, Object bean, Class<? extends Event> parameterClazz) {
         eventDispatcher.on(parameterClazz)
-                .flatMap(e -> {
-                    Optional<Object> r = Optional.ofNullable(ReflectionUtils.invokeMethod(method, bean, e));
+                .flatMap(event -> {
+                    Optional<Object> r = Optional.ofNullable(ReflectionUtils.invokeMethod(method, bean, event));
                     return r.filter(o -> o instanceof Publisher)
                             .map(o -> (Publisher)o)
                             .orElse(Mono.empty());

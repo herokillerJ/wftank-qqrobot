@@ -33,10 +33,8 @@ public class DiscordChatBeanProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         ReflectionUtils.doWithMethods(bean.getClass(), method -> {
-            if (method.isAnnotationPresent(DiscordChat.class)) {
-                doDiscordChat(method, bean);
-            }
-        });
+            doDiscordChat(method, bean);
+        },method -> method.isAnnotationPresent(DiscordChat.class));
 
         return bean;
     }
