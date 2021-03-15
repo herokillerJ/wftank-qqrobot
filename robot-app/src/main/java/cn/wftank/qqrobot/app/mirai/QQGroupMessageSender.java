@@ -39,7 +39,7 @@ public class QQGroupMessageSender {
                 bot.getGroup(groupId).sendMessage(messageChain);
                 Thread.sleep(Duration.ofSeconds(5).toMillis());
             } catch (Exception e) {
-                log.error("send message to group:{} exception:"+ExceptionUtils.getStackTrace(e));
+                log.error("send message to group:{} exception:{}",groupId,ExceptionUtils.getStackTrace(e));
             }
         });
     }
