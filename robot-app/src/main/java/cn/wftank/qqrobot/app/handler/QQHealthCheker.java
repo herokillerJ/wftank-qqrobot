@@ -19,7 +19,7 @@ public class QQHealthCheker {
     private Bot bot;
 
     //间隔1分钟检查一次机器人登录状态,防止断线
-    @Scheduled(fixedDelay = 1000*60)
+    @Scheduled(fixedDelay = 1000*60*10)
     private void robotHealthCheck(){
         log.info("check bot:{} health..",bot.getId());
         if (!bot.isOnline()){
