@@ -32,9 +32,9 @@ public class QQGroupMessageSender {
         String groupsStr = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
         Set<Long> collect = Arrays.stream(groupsStr.split(",")).map(Long::valueOf).collect(Collectors.toSet());
         collect.forEach(groupId -> {
-            bot.getGroup(groupId).sendMessage(messageChain);
             //每个群延时发送防止被当做机器人
             try {
+                bot.getGroup(groupId).sendMessage(messageChain);
                 Thread.sleep(Duration.ofSeconds(5).toMillis());
             } catch (InterruptedException e) {
                 log.error(ExceptionUtils.getStackTrace(e));
