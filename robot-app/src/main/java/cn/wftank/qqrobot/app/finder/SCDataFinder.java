@@ -30,7 +30,7 @@ public class SCDataFinder {
     private List<IndexEntity> indexList = new CopyOnWriteArrayList<>();
 
     private Map<Pattern,Integer> patternMap = new LinkedHashMap<>();
-
+    //字符串匹配算法
     private StringDistance similarMatcher = new MetricLCS();
 
     {
@@ -143,11 +143,16 @@ public class SCDataFinder {
 
 
     private MatchIndexEntity match(String keywordStr, IndexEntity indexEntity) {
-        //比indexEntity
         MatchIndexEntity matchIndexEntity = new MatchIndexEntity();
+        //替换掉所有符号并转小写
         String sourceStr = StringUtils.replaceAllMarks(keywordStr).toLowerCase();
+        //商品中文名替换掉所有符号转小写
         String cnName = StringUtils.replaceAllMarks(indexEntity.getNameCn()).toLowerCase();
+        //商品英文名替换掉所有符号转小写
         String enName = StringUtils.replaceAllMarks(indexEntity.getName()).toLowerCase();
+        /**
+         * 分数越小证明源字符串"转换"位商品名的"步数"越低，中文和英文哪个低取哪个
+         */
         double cnScore = similarMatcher.distance(sourceStr, cnName);
         double enScore = similarMatcher.distance(sourceStr, enName);
         matchIndexEntity.setMatchScore(Math.min(cnScore,enScore));
@@ -156,6 +161,7 @@ public class SCDataFinder {
     }
 
     private String getKeywordByPattern(String content){
+        //通过正则提取关键词
         Iterator<Map.Entry<Pattern, Integer>> iterator = patternMap.entrySet().iterator();
         while (iterator.hasNext()){
             Map.Entry<Pattern, Integer> entry = iterator.next();
