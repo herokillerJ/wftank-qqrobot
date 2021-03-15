@@ -23,7 +23,7 @@ public class GlobalConfig {
 
     //bot
     public static final String CONFIG_DIR = "./";
-    public static final String CONFIG_NAME = "config.txt";
+    public static final String CONFIG_NAME = "config.properties";
     public static final String CONFIG_PATH = CONFIG_DIR+CONFIG_NAME;
 
     private static final LoadingCache<ConfigKeyEnum, String> configCache = Caffeine.newBuilder()
@@ -49,7 +49,7 @@ public class GlobalConfig {
     public static void checkConfig() throws FileNotFoundException {
         File file = new File(CONFIG_PATH);
         if (!file.exists()){
-            throw new FileNotFoundException("请创建config.txt文件并配置!");
+            throw new FileNotFoundException("请创建config.peroperties文件并配置!");
         }
     }
 
