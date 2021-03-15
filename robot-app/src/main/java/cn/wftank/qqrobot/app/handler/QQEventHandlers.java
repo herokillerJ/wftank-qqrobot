@@ -6,11 +6,14 @@ import cn.wftank.qqrobot.app.finder.SCDataFinder;
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.app.model.vo.ProductRentShopVO;
 import cn.wftank.qqrobot.app.model.vo.ProductShopVO;
+import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
+import cn.wftank.qqrobot.common.config.GlobalConfig;
 import kotlin.coroutines.CoroutineContext;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.message.data.*;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +22,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class QQEventHandlers extends SimpleListenerHost {
@@ -35,6 +41,15 @@ public class QQEventHandlers extends SimpleListenerHost {
 
     @EventHandler
     public void onMessage(@NotNull GroupMessageEvent event) throws Exception { // 可以抛出任何异常, 将在 handleException 处理
+        String groups = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
+        //检查一下群组配置是否为空
+        if (StringUtils.isBlank(groups))return;
+        groups = groups.trim();
+        //在这里过滤配置的群组而不是在初始化配置中,以达到动态的目的
+        Set<Long> groupSet = Arrays.stream(groups.split(",")).map(Long::valueOf).collect(Collectors.toSet());
+        //过滤掉没有配置的群组
+        if (! groupSet.contains(event.getGroup().getId())) return;
+        //处理接收消息的逻辑
         MessageChain messageChain = event.getMessage();
         boolean isAtBot = false;
         StringBuilder plainTextBuilder = new StringBuilder("");

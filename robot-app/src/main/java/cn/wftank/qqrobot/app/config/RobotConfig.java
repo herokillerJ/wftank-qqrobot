@@ -18,9 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Configuration
 public class RobotConfig {
@@ -55,13 +52,8 @@ public class RobotConfig {
             setNetworkLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
             setBotLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
         }});
-        String groups = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
-        if (StringUtils.isBlank(groups)){
-            throw new RuntimeException("请配置发通知的QQ群");
-        }
-        Set<Long> groupSet = Arrays.stream(groups.split(",")).map(Long::valueOf).collect(Collectors.toSet());
         bot.getEventChannel()
-                .filter(ev -> ev instanceof GroupEvent && groupSet.contains(((GroupEvent)ev).getGroup().getId()) )
+                .filter(ev -> ev instanceof GroupEvent)
                 .registerListenerHost(qqEventHandlers);
         bot.login();
         return bot;

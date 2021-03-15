@@ -1,14 +1,16 @@
+#配置会每分钟加载一次，支持热编辑的配置可以不用重启就生效，注释没说明的配置就是不能热编辑
 #wftank的星际公民数据库版本,默认最新版(latest),如需指定版本,参考https://cdn.jsdelivr.net/gh/herokillerJ/starcitizen-data/
 sc.database.version=latest
 #qq号
 qq=机器人的QQ号
 #QQ密码
 password=机器人的QQ密码
-#监控的群号,多个用英文逗号分隔
+#监控的群号,多个用英文逗号分隔,支持热编辑
 groups=123,456
 #登录方式 ANDROID_PHONE ANDROID_PAD ANDROID_WATCH
 # 注意: ANDROID_PAD不支持戳一戳事件解析
 mirai.protocol=ANDROID_PAD
-#百度翻译设置,删掉就不翻译
+#百度翻译API的appid,删掉就不翻译,支持热编辑
 translate.baidu.appid=百度翻译API的appid
+#百度翻译API的secret,删掉就不翻译,支持热编辑
 translate.baidu.secret=百度翻译API的secret

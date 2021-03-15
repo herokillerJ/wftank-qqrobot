@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,14 +31,15 @@ public class QQGroupMessageSender {
         }
         //获取配置的QQ群
         String groupsStr = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
-        Set<Long> collect = Arrays.stream(groupsStr.split(",")).map(Long::valueOf).collect(Collectors.toSet());
+        //使用有序set
+        Set<Long> collect = Arrays.stream(groupsStr.split(",")).map(Long::valueOf).collect(Collectors.toCollection(LinkedHashSet::new));
         collect.forEach(groupId -> {
             //每个群延时发送防止被当做机器人
             try {
                 bot.getGroup(groupId).sendMessage(messageChain);
                 Thread.sleep(Duration.ofSeconds(5).toMillis());
-            } catch (InterruptedException e) {
-                log.error(ExceptionUtils.getStackTrace(e));
+            } catch (Exception e) {
+                log.error("send message to group:{} exception:"+ExceptionUtils.getStackTrace(e));
             }
         });
     }
