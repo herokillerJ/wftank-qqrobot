@@ -115,21 +115,20 @@ public class SCDataFinder {
     public List<MatchIndexEntity> autoFind(String content) {
         String keywordStr = getKeywordByPattern(content);
         if (keywordStr == null) return null;
-        List<MatchIndexEntity> matchList = indexList.stream()
-                .map(indexEntity -> {
-            /**
-             * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
-             * 先匹配中文,如果中文没匹配上,去匹配英文
-             */
-            MatchIndexEntity matchIndexEntity = match(keywordStr, indexEntity);
-            return matchIndexEntity;
-        })
+        List<MatchIndexEntity> matchList = indexList.parallelStream()
                 .filter(matchIndexEntity ->
-                        StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getNameCn()).length() > 0
+                StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getNameCn()).length() > 0
                         || StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getName()).length() > 0)
-                .sorted((match1, match2) -> {
-                    //分数小的在前面(分数越低,目标字符串转换到原字符串步骤越少)
-                    return sort(match1, match2);
+                .map(indexEntity -> {
+                    /**
+                     * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
+                     * 先匹配中文,如果中文没匹配上,去匹配英文
+                     */
+                    MatchIndexEntity matchIndexEntity = match(keywordStr, indexEntity);
+                    return matchIndexEntity;
+                }).sorted((match1, match2) -> {
+                            //分数小的在前面(分数越低,目标字符串转换到原字符串步骤越少)
+                            return sort(match1, match2);
                 }).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(matchList)){
             //做多取前5个
