@@ -117,8 +117,9 @@ public class SCDataFinder {
         if (keywordStr == null) return null;
         List<MatchIndexEntity> matchList = indexList.parallelStream()
                 .filter(matchIndexEntity ->
-                StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getNameCn()).length() > 0
-                        || StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getName()).length() > 0)
+                    //中文或者英文至少应该有一个相同字符
+                    StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getNameCn()).length() > 0
+                    || StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getName()).length() > 0)
                 .map(indexEntity -> {
                     /**
                      * 将物品名称用空格拆分,拆分后的每个单词去句子中匹配,根据匹配的单词数量排序
