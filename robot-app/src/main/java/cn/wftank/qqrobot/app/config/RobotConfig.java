@@ -7,6 +7,7 @@ import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.event.events.GroupEvent;
 import net.mamoe.mirai.utils.BotConfiguration;
+import net.mamoe.mirai.utils.LoggerAdapters;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -51,8 +52,8 @@ public class RobotConfig {
                 }
             }
             setWorkingDir(workDir);
-            setNetworkLoggerSupplier(bot -> new MiraiLogger());
-            setBotLoggerSupplier(bot -> new MiraiLogger());
+            setNetworkLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
+            setBotLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
         }});
         String groups = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
         if (StringUtils.isBlank(groups)){
