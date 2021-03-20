@@ -38,7 +38,7 @@ public class DiscordEventHandlers {
             Message message = event.getMessage();
             if (!filterMessage(message)) return Mono.empty();
             MessageChainBuilder builder = new MessageChainBuilder();
-            builder.add("SC Leaks消息：");
+            builder.add("Discord消息：");
             //发言人
             message.getAuthor().ifPresent(author -> {
                 builder.add("\n"+author.getTag()+"说：");
