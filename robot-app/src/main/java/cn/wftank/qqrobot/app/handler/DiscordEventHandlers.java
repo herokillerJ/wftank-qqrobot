@@ -36,6 +36,7 @@ public class DiscordEventHandlers {
     public Mono<Message> listen(MessageCreateEvent event) {
         try {
             Message message = event.getMessage();
+            log.info("discord receive message:"+message.getContent());
             if (!filterMessage(message)) return Mono.empty();
             MessageChainBuilder builder = new MessageChainBuilder();
             builder.add("Discord消息：");
@@ -77,7 +78,6 @@ public class DiscordEventHandlers {
                     embed.getUrl().ifPresent(url -> builder.add("\n链接："+url));
                 });
             }
-            log.info("discord receive message:"+message.getContent());
             sender.sendMessageForAllGroups(builder.build(),images);
         }catch (Exception e){
             log.error(ExceptionUtils.getStackTrace(e));
