@@ -1,13 +1,13 @@
 package cn.wftank.qqrobot.discord4j.spring;
 
-import cn.wftank.qqrobot.discord4j.spring.annotations.EnableDiscord;
+import cn.wftank.qqrobot.discord4j.spring.beans.DiscordChatBeanProcessor;
+import cn.wftank.qqrobot.discord4j.spring.beans.DiscordEventBeanProcessor;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.gateway.GatewayOptions;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import(DiscordTokenAutoConfiguration.class)
-@ConditionalOnBean(annotation = EnableDiscord.class)
 @ConditionalOnProperty("discord.token")
 public class DiscordAutoConfiguration extends DiscordClientConfig {
 
@@ -38,6 +37,19 @@ public class DiscordAutoConfiguration extends DiscordClientConfig {
     public EventDispatcher eventDispatcher() {
         return EventDispatcher.builder().build();
     }
+
+    @Bean("discordEventBeanProcessor")
+    @ConditionalOnMissingBean
+    public DiscordEventBeanProcessor discordEventBeanProcessor(EventDispatcher eventDispatcher){
+        return new DiscordEventBeanProcessor(eventDispatcher);
+    }
+
+    @Bean("discordChatBeanProcessor")
+    @ConditionalOnMissingBean
+    public DiscordChatBeanProcessor discordChatBeanProcessor(EventDispatcher eventDispatcher){
+        return new DiscordChatBeanProcessor(eventDispatcher);
+    }
+
 
     @Bean
     @DependsOn({"discordClient", "eventDispatcher", "discordEventBeanProcessor"})

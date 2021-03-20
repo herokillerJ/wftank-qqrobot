@@ -63,11 +63,11 @@
       <artifactId>kotlin-stdlib-jdk8</artifactId>
       <version>${kotlin.version}</version>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>net.mamoe</groupId>-->
-<!--      <artifactId>mirai-login-solver-selenium</artifactId>-->
-<!--      <version>1.0-dev-16</version>-->
-<!--    </dependency>-->
+    <!--<dependency>
+      <groupId>net.mamoe</groupId>
+      <artifactId>mirai-login-solver-selenium</artifactId>
+      <version>1.0-dev-16</version>
+    </dependency>-->
     <!--字符串近似度-->
     <dependency>
       <groupId>info.debatty</groupId>

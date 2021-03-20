@@ -8,6 +8,7 @@
         <module>robot-app</module>
         <module>robot-common</module>
         <module>robot-dao</module>
+        <module>robot-discord</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -92,6 +93,16 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.11</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
         </dependency>
         <!--http client-->
         <dependency>
