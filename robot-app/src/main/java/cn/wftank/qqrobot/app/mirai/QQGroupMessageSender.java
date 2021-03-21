@@ -16,7 +16,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,15 +42,13 @@ public class QQGroupMessageSender {
         collect.forEach(groupId -> {
             //每个群延时发送防止被当做机器人
             try {
+                MessageChainBuilder messageBuilder = new MessageChainBuilder();
                 Group group = bot.getGroup(groupId);
-                group.sendMessage(messageChain);
-                MessageChainBuilder imageMessage = new MessageChainBuilder();
-                Optional.ofNullable(imageList)
-                        .filter(CollectionUtils::isNotEmpty)
-                        .ifPresent(images -> {
-                            images.parallelStream().forEach(image -> imageMessage.add(group.uploadImage(ExternalResource.create(image))));
-                            group.sendMessage(imageMessage.build());
-                        });
+                messageBuilder.add(messageChain);
+                if (CollectionUtils.isNotEmpty(imageList)){
+                    imageList.parallelStream().forEach(image -> messageBuilder.add(group.uploadImage(ExternalResource.create(image))));
+                }
+                group.sendMessage(messageBuilder.build());
                 Thread.sleep(Duration.ofSeconds(5).toMillis());
             } catch (Exception e) {
                 log.error("send message to group:{} exception:{}",groupId,ExceptionUtils.getStackTrace(e));
