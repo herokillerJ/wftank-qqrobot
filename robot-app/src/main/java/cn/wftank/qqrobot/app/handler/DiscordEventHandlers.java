@@ -8,6 +8,7 @@ import cn.wftank.qqrobot.common.util.FileUtil;
 import cn.wftank.qqrobot.discord4j.spring.annotations.DiscordEventListener;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.Embed;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class DiscordEventHandlers {
@@ -50,8 +52,15 @@ public class DiscordEventHandlers {
                 //翻译
                 builder.add("[机翻:"+translator.translateEn2Cn(message.getContent())+"]");
             }
-            //内嵌消息
             List<File> images = new ArrayList<>();
+            //附件 一般是图片
+            Set<Attachment> attachments = message.getAttachments();
+            if (!CollectionUtils.isEmpty(attachments)){
+                for (Attachment attachment: attachments) {
+                    images.add(FileUtil.downloadAsTmpFromUrl(attachment.getUrl()));
+                }
+            }
+            //内嵌消息
             List<Embed> embeds = event.getMessage().getEmbeds();
             if (!CollectionUtils.isEmpty(embeds)){
                 builder.add("\n内嵌消息：");

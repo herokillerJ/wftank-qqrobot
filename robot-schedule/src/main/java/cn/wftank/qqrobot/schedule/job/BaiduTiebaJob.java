@@ -104,7 +104,7 @@ public class BaiduTiebaJob {
                     }
                 }
             }
-            Files.writeString(file.toPath(),newestPid);
+            Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8));
             if (!newThreads.isEmpty()){
                 TiebaNotifyEvent event = new TiebaNotifyEvent();
                 event.setNewThreads(newThreads);
