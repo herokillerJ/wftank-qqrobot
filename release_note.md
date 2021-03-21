@@ -4,3 +4,4 @@ v1.0.1
 3. 修复当机器人被某个群禁言时，后面的群都无法收到消息的问题。
 4. 贴吧帖子更新标记从帖子标题改为帖子pid
 5. 加入discord频道信息推送
+6. 增加启动参数,解决jdk11的bug:https://bugs.openjdk.java.net/browse/JDK-8213202
