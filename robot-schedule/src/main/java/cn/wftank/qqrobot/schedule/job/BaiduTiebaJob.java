@@ -4,6 +4,7 @@ import cn.wftank.qqrobot.common.event.NotifyEventPublisher;
 import cn.wftank.qqrobot.common.event.tieba.TiebaNotifyEvent;
 import cn.wftank.qqrobot.common.model.event.TiebaThread;
 import cn.wftank.qqrobot.common.util.JsonUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
@@ -81,37 +82,39 @@ public class BaiduTiebaJob {
                 thread.setPid(pid);
                 threads.add(thread);
             }
-            List<TiebaThread> newThreads = new ArrayList<>();
-            TiebaThread firstThread = threads.get(0);
-            String newestPid = firstThread.getPid().trim();
-            log.info("g-lao newestPid:"+newestPid);
-            //xpath选择有时会出问题导致所有选择器都是空,这里做下过滤
-            if (StringUtils.isBlank(newestPid)) return;
-            if (first){
-                TiebaThread tiebaThread = threads.get(0);
-                newThreads.add(tiebaThread);
-            }else{
-                if (newestPid.equals(latestPid)){
-                    return;
-                }
-                for (TiebaThread thread : threads) {
-                    if (thread.getPid().equals(latestPid)){
-                        break;
-                    }else{
-                        if (StringUtils.isNotBlank(newestPid)){
-                            newThreads.add(thread);
+            if (CollectionUtils.isNotEmpty(threads)){
+                List<TiebaThread> newThreads = new ArrayList<>();
+                TiebaThread firstThread = threads.get(0);
+                String newestPid = firstThread.getPid().trim();
+                log.info("g-lao newestPid:"+newestPid);
+                //xpath选择有时会出问题导致所有选择器都是空,这里做下过滤
+                if (StringUtils.isBlank(newestPid)) return;
+                if (first){
+                    TiebaThread tiebaThread = threads.get(0);
+                    newThreads.add(tiebaThread);
+                }else{
+                    if (newestPid.equals(latestPid)){
+                        return;
+                    }
+                    for (TiebaThread thread : threads) {
+                        if (thread.getPid().equals(latestPid)){
+                            break;
+                        }else{
+                            if (StringUtils.isNotBlank(newestPid)){
+                                newThreads.add(thread);
+                            }
                         }
                     }
                 }
-            }
-            Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8));
-            if (!newThreads.isEmpty()){
-                TiebaNotifyEvent event = new TiebaNotifyEvent();
-                event.setNewThreads(newThreads);
-                event.setFirst(first);
-                event.setAuthorName("G佬");
-                notifyEventPublisher.publish(event);
-                log.info(jobName+" new threads:"+JsonUtil.toJson(newThreads));
+                Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8));
+                if (!newThreads.isEmpty()){
+                    TiebaNotifyEvent event = new TiebaNotifyEvent();
+                    event.setNewThreads(newThreads);
+                    event.setFirst(first);
+                    event.setAuthorName("G佬");
+                    notifyEventPublisher.publish(event);
+                    log.info(jobName+" new threads:"+JsonUtil.toJson(newThreads));
+                }
             }
 
         } catch (IOException e) {
