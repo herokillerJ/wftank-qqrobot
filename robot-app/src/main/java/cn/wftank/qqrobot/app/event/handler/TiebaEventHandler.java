@@ -1,8 +1,6 @@
 package cn.wftank.qqrobot.app.event.handler;
 
 import cn.wftank.qqrobot.app.mirai.QQGroupMessageSender;
-import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
-import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.event.tieba.TiebaNotifyEvent;
 import cn.wftank.qqrobot.common.util.JsonUtil;
 import com.lmax.disruptor.EventHandler;
@@ -13,12 +11,8 @@ import net.mamoe.mirai.message.data.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -30,17 +24,7 @@ public class TiebaEventHandler implements EventHandler<TiebaNotifyEvent> {
     @Override
     public void onEvent(TiebaNotifyEvent event, long sequence, boolean endOfBatch) throws Exception {
         log.info("tieba event:"+ JsonUtil.toJson(event));
-        String groupsStr = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
-        Set<Long> collect = Arrays.stream(groupsStr.split(",")).map(Long::valueOf).collect(Collectors.toSet());
-        collect.forEach(groupId -> {
-            process(event);
-            //每个群延时发送防止被当做机器人
-            try {
-                Thread.sleep(Duration.ofSeconds(5).toMillis());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
+        process(event);
     }
 
     private void process(TiebaNotifyEvent event) {
