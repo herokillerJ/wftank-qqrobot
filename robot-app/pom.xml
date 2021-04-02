@@ -48,7 +48,7 @@
           <artifactId>kotlin-jvm-blocking-bridge-jvm</artifactId>
         </exclusion>
       </exclusions>
-      <version>2.4.2</version> <!-- 替换版本为你需要的版本 -->
+      <version>2.5.0</version> <!-- 替换版本为你需要的版本 -->
     </dependency>
     <dependency>
       <groupId>net.mamoe</groupId>
