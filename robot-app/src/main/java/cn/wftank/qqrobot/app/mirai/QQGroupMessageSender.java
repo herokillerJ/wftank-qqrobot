@@ -45,6 +45,7 @@ public class QQGroupMessageSender {
                 if (CollectionUtils.isNotEmpty(imageList)){
                     imageList.parallelStream().forEach(image -> messageBuilder.add(group.uploadImage(ExternalResource.create(image))));
                 }
+                log.info("send qq msg:"+messageChain.contentToString());
                 group.sendMessage(messageBuilder.build());
                 Thread.sleep(Duration.ofSeconds(5).toMillis());
             } catch (Exception e) {
