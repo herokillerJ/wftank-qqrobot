@@ -51,7 +51,7 @@ jobs:
     - name: Rename File
       run: mv ./wftank-qqrobot.zip wftank-qqrobot-${{ steps.get_version.outputs.version }}.zip
     - name: rclone
-      uses: wei/rclone@v1
+      uses: wei/rclone@v1.1.1
       env:
         RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
       with:
