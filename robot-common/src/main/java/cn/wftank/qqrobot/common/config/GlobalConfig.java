@@ -1,5 +1,6 @@
 package cn.wftank.qqrobot.common.config;
 
+import cn.wftank.qqrobot.common.util.StringUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,15 @@ public class GlobalConfig {
 
     //bot
     public static final String CONFIG_DIR = "./";
-    public static final String CONFIG_NAME = "config.properties";
+    public static final String CONFIG_NAME;
+    static {
+        String property = System.getProperty("spring.profiles.active");
+        String filePath = "config.properties";
+        if (StringUtils.isNotBlank(property)){
+            filePath = "config-"+property+".properties";
+        }
+        CONFIG_NAME = filePath;
+    }
     public static final String CONFIG_PATH = CONFIG_DIR+CONFIG_NAME;
 
     private static final LoadingCache<ConfigKeyEnum, String> configCache = Caffeine.newBuilder()
@@ -49,7 +58,7 @@ public class GlobalConfig {
     public static void checkConfig() throws FileNotFoundException {
         File file = new File(CONFIG_PATH);
         if (!file.exists()){
-            throw new FileNotFoundException("请创建config.peroperties文件并配置!");
+            throw new FileNotFoundException("请创建config.properties文件并配置!");
         }
     }
 

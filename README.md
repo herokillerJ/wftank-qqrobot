@@ -75,7 +75,7 @@ https://starcitizenzw.com
   4. 启动服务，在wftank-qqrobot.jar文件所在目录通过cmd、powershell等执行
   
      ```shell
-       java -jar wftank-qqrobot.jar
+       java -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -jar wftank-qqrobot.jar
      ```
   
      注意：第一次启动时由于没有保存设备信息，会要求进行验证，请按照控制台的提示去指定连接验证后，在控制台输入任意字符继续，仅在新电脑上的第一次登陆需要，以后不需要。

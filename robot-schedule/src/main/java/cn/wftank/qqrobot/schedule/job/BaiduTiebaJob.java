@@ -4,6 +4,7 @@ import cn.wftank.qqrobot.common.event.NotifyEventPublisher;
 import cn.wftank.qqrobot.common.event.tieba.TiebaNotifyEvent;
 import cn.wftank.qqrobot.common.model.event.TiebaThread;
 import cn.wftank.qqrobot.common.util.JsonUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jsoup.Jsoup;
@@ -25,6 +26,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class BaiduTiebaJob {
@@ -50,10 +52,12 @@ public class BaiduTiebaJob {
             }
         }
         try(BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            String latestTitle = reader.readLine();
-            if (StringUtils.isBlank(latestTitle)){
+            String latestPid = reader.readLine();
+            if (StringUtils.isBlank(latestPid)){
                 first = true;
             }
+            latestPid = Optional.ofNullable(latestPid).map(String::trim).orElse("");
+            log.info("g-lao lastPid:"+latestPid);
             //获取Glao首页的帖子
             List<TiebaThread> threads = new ArrayList<>();
             Document document = Jsoup.connect("https://tieba.baidu.com/home/main?un=%E7%81%AC%E7%81%ACG%E7%81%AC%E7%81%AC&ie=utf-8&id=tb.1.c71983a8._2RHIWDtaJALopgO4mFVeg")
@@ -70,42 +74,47 @@ public class BaiduTiebaJob {
                 String title = titleElement.attr("title");
                 String path = titleElement.attr("href");
                 path = "https://tieba.baidu.com/"+path.substring(0,path.indexOf("?"));
+                String pid = path.substring(path.lastIndexOf("/")+1);
                 TiebaThread thread = new TiebaThread();
                 thread.setTitle(title);
                 thread.setGroup(group);
                 thread.setUrl(path);
+                thread.setPid(pid);
                 threads.add(thread);
             }
-            List<TiebaThread> newThreads = new ArrayList<>();
-            TiebaThread firstThread = threads.get(0);
-            String newestTitle = firstThread.getTitle();
-            //xpath选择有时会出问题导致所有选择器都是空,这里做下过滤
-            if (StringUtils.isBlank(newestTitle)) return;
-            if (first){
-                TiebaThread tiebaThread = threads.get(0);
-                newThreads.add(tiebaThread);
-            }else{
-                if (newestTitle.equals(latestTitle)){
-                    return;
-                }
-                for (TiebaThread thread : threads) {
-                    if (thread.getTitle().equals(latestTitle)){
-                        break;
-                    }else{
-                        if (StringUtils.isNotBlank(newestTitle)){
-                            newThreads.add(thread);
+            if (CollectionUtils.isNotEmpty(threads)){
+                List<TiebaThread> newThreads = new ArrayList<>();
+                TiebaThread firstThread = threads.get(0);
+                String newestPid = firstThread.getPid().trim();
+                log.info("g-lao newestPid:"+newestPid);
+                //xpath选择有时会出问题导致所有选择器都是空,这里做下过滤
+                if (StringUtils.isBlank(newestPid)) return;
+                if (first){
+                    TiebaThread tiebaThread = threads.get(0);
+                    newThreads.add(tiebaThread);
+                }else{
+                    if (newestPid.equals(latestPid)){
+                        return;
+                    }
+                    for (TiebaThread thread : threads) {
+                        if (thread.getPid().equals(latestPid)){
+                            break;
+                        }else{
+                            if (StringUtils.isNotBlank(newestPid)){
+                                newThreads.add(thread);
+                            }
                         }
                     }
                 }
-            }
-            Files.writeString(file.toPath(),newestTitle);
-            if (!newThreads.isEmpty()){
-                TiebaNotifyEvent event = new TiebaNotifyEvent();
-                event.setNewThreads(newThreads);
-                event.setFirst(first);
-                event.setAuthorName("G佬");
-                notifyEventPublisher.publish(event);
-                log.info(jobName+" new threads:"+JsonUtil.toJson(newThreads));
+                Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8));
+                if (!newThreads.isEmpty()){
+                    TiebaNotifyEvent event = new TiebaNotifyEvent();
+                    event.setNewThreads(newThreads);
+                    event.setFirst(first);
+                    event.setAuthorName("G佬");
+                    notifyEventPublisher.publish(event);
+                    log.info(jobName+" new threads:"+JsonUtil.toJson(newThreads));
+                }
             }
 
         } catch (IOException e) {

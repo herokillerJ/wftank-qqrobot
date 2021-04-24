@@ -78,7 +78,7 @@ public class SpectrumJob {
                     }
                 }
             }
-            Files.writeString(file.toPath(),newestId);
+            Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8));
             if (!newThreads.isEmpty()){
                 SpectrumNotifyEvent event = new SpectrumNotifyEvent();
                 event.setNewThreads(newThreads);
@@ -108,8 +108,8 @@ public class SpectrumJob {
                 log.error(jobName+"create flag file ex:"+ ExceptionUtils.getStackTrace(e));
             }
         }
-        try {
-            String latestId = Files.readString(file.toPath());
+        try(BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            String latestId = reader.readLine();
             if (StringUtils.isBlank(latestId)){
                 first = true;
             }
@@ -136,7 +136,7 @@ public class SpectrumJob {
                     }
                 }
             }
-            Files.writeString(file.toPath(),newestId);
+            Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8));
             if (!newThreads.isEmpty()){
                 SpectrumNotifyEvent event = new SpectrumNotifyEvent();
                 event.setNewThreads(newThreads);

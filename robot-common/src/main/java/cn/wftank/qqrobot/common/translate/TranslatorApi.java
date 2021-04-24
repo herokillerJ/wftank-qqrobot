@@ -18,6 +18,10 @@ public interface TranslatorApi {
      */
     String translate(String source,String from,String to);
 
+    default String translateEn2Cn(String source){
+        return translate(source,"en","zh");
+    }
+
     /**
      * 批量翻译
      * @param sourceList

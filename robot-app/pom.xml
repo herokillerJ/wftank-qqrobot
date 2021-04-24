@@ -12,10 +12,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <kotlin.version>1.4.21</kotlin.version>
+    <kotlin.version>1.4.32</kotlin.version>
     <logj.version>2.13.1</logj.version>
   </properties>
 
@@ -51,7 +48,7 @@
           <artifactId>kotlin-jvm-blocking-bridge-jvm</artifactId>
         </exclusion>
       </exclusions>
-      <version>2.4.2</version> <!-- 替换版本为你需要的版本 -->
+      <version>2.6.2</version> <!-- 替换版本为你需要的版本 -->
     </dependency>
     <dependency>
       <groupId>net.mamoe</groupId>
@@ -63,11 +60,11 @@
       <artifactId>kotlin-stdlib-jdk8</artifactId>
       <version>${kotlin.version}</version>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>net.mamoe</groupId>-->
-<!--      <artifactId>mirai-login-solver-selenium</artifactId>-->
-<!--      <version>1.0-dev-16</version>-->
-<!--    </dependency>-->
+    <!--<dependency>
+      <groupId>net.mamoe</groupId>
+      <artifactId>mirai-login-solver-selenium</artifactId>
+      <version>1.0-dev-16</version>
+    </dependency>-->
     <!--字符串近似度-->
     <dependency>
       <groupId>info.debatty</groupId>

@@ -79,7 +79,7 @@ public class IssueCouncilJob {
                     }
                 }
             }
-            Files.writeString(file.toPath(),newestId);
+            Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8));
             if (!newIssues.isEmpty()){
                 IssueNotifyEvent event = new IssueNotifyEvent();
                 event.setNewIssues(newIssues);

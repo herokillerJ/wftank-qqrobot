@@ -12,5 +12,6 @@ public class TiebaThread {
     private String title;
     private String group;
     private String url;
+    private String pid;
 
 }

@@ -20,6 +20,8 @@ public enum ConfigKeyEnum{
         //翻译
         TRANSLATE_BAIDU_APPID("translate.baidu.appid"),
         TRANSLATE_BAIDU_SECRET("translate.baidu.secret"),
+        //discord,
+        DISCORD_CHANNEL_IDS("discord.channel.ids")
         ;
         private String key;
 
