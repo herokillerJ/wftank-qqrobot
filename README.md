@@ -51,7 +51,7 @@ https://starcitizenzw.com
   
   2. 将最新版的zip文件下载到本地，[下载地址](https://1drv.ms/u/s!AprDolSye6dIlJFOb4-j12LgLFf5iw?e=tifffe)
   
-  3. 解压到任意目录下，修改config.txt配置文件
+  3. 解压到任意目录下，修改config.properties配置文件
   
      ```properties
      #wftank的星际公民数据库版本,默认最新版(latest),如需指定版本,请从连接中查看所有版本https://cdn.jsdelivr.net/gh/herokillerJ/starcitizen-data/
