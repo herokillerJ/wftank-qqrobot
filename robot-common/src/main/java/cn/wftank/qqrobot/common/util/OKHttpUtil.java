@@ -7,7 +7,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -122,6 +125,35 @@ public class OKHttpUtil {
                 log.debug("resp:"+respStr);
             }
             return JsonUtil.parseJson(respStr,typeReference);
+        } catch (IOException e) {
+            log.error("request exception:"+ ExceptionUtils.getStackTrace(e));
+        }
+        return null;
+    }
+
+    public static File getFile(String url, String filePath) {
+        File file = new File(filePath);
+        if (file.exists()){
+            log.warn("file:{} will be replace!",file.getAbsolutePath());
+        }else if(file.isDirectory()) {
+            throw new IllegalArgumentException("please support a file path");
+        }else{
+            try {
+                File dir = file.getParentFile();
+                if (!dir.exists()) dir.mkdirs();
+                file.createNewFile();
+            } catch (IOException e) {
+                log.error("download file ex:"+ExceptionUtils.getStackTrace(e));
+            }
+        }
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            Files.copy(response.body().byteStream(),file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return file;
         } catch (IOException e) {
             log.error("request exception:"+ ExceptionUtils.getStackTrace(e));
         }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>qq-robot</artifactId>
+    <groupId>cn.wftank</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>robot-search-engine</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <name>robot-search-engine</name>
+
+  <properties>
+    <lucene.version>8.8.2</lucene.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>cn.wftank</groupId>
+      <artifactId>robot-common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <!--lucene-->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-demo</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-expressions</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-benchmark</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <!--ik分词-->
+    <dependency>
+      <groupId>com.jianggujin</groupId>
+      <artifactId>IKAnalyzer-lucene</artifactId>
+      <version>8.0.0</version>
+    </dependency>
+  </dependencies>
+
+</project>

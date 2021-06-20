@@ -9,6 +9,7 @@
         <module>robot-common</module>
         <module>robot-dao</module>
         <module>robot-discord</module>
+        <module>robot-search-engine</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
