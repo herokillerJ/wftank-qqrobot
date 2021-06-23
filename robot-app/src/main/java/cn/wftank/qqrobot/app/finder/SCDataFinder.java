@@ -60,6 +60,8 @@ public class SCDataFinder {
      */
     @Scheduled(fixedDelay = 1000*60*60, initialDelay=1000*60*60)
     private void load(){
+        log.info("开始重载查询索引");
+        long start = System.currentTimeMillis();
         String indexUrl = URL_PREFIX+ GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION) +"/index.json";
         String extIndexUrl = URL_PREFIX+GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION)+"/ext_index.json";
         Index index = OKHttpUtil.get(indexUrl, new TypeReference<Index>() {});
@@ -68,6 +70,8 @@ public class SCDataFinder {
         mainList.addAll(extIndex.getIndex());
         List<String> indesJsonList = mainList.stream().map(JsonUtil::toJson).collect(Collectors.toList());
         wFtankSearcher.reloadIndexFromString(indesJsonList);
+        long end = System.currentTimeMillis();
+        log.info("重载索引完成，耗时：{}秒",(end-start)/1000);
     }
 
     public List<String> search(String keyword){
