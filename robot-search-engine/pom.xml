@@ -16,7 +16,7 @@
   <name>robot-search-engine</name>
 
   <properties>
-    <lucene.version>8.8.2</lucene.version>
+    <lucene.version>8.9.0</lucene.version>
   </properties>
 
   <dependencies>
@@ -43,17 +43,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-demo</artifactId>
-      <version>${lucene.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-expressions</artifactId>
-      <version>${lucene.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-benchmark</artifactId>
       <version>${lucene.version}</version>
     </dependency>
     <!--ik分词-->

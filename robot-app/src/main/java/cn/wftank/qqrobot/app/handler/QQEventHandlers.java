@@ -129,33 +129,33 @@ public class QQEventHandlers extends SimpleListenerHost {
     }
 
     private void processCommand(@NotNull GroupMessageEvent event, String content) {
-        boolean isCommand = false;
-        if (content.startsWith("-")){
-            isCommand = true;
-        }
-        if (isCommand){
+        content = StringUtils.trim(content);
+        if (StringUtils.isNotBlank(content)){
             int firstSpaceIndex = content.indexOf(" ");
             String commandKey;
             if (firstSpaceIndex < 0){
-                commandKey = content.substring(1);
+                commandKey = content;
             }else{
-                commandKey = content.substring(1,firstSpaceIndex);
+                commandKey = content.substring(0,firstSpaceIndex);
             }
-            if ("help".equalsIgnoreCase(commandKey)){
+            if ("复合查询".equalsIgnoreCase(commandKey)){
+                processMixQuery(event);
+            }
+            if ("帮助".equalsIgnoreCase(commandKey)){
                 final QuoteReply quote = new QuoteReply(event.getSource());
                 event.getGroup().sendMessage(quote
-                        .plus("直接发：\"xxx\"在哪买即可搜索商品,例：\n")
+                        .plus("普通查询：不用@小助手，直接发：\"xxx在哪买\"即可搜索商品,例：\n")
                         .plus("水星在哪买\n"));
-            }else{
-                final QuoteReply quote = new QuoteReply(event.getSource());
-                event.getGroup().sendMessage(quote
-                        .plus("请使用-help查看小助手支持的指令"));
             }
         }else{
             final QuoteReply quote = new QuoteReply(event.getSource());
             event.getGroup().sendMessage(quote
-                    .plus("请使用-help查看小助手支持的指令"));
+                    .plus("请@小助手并输入\"帮助\"来查看小助手的使用方式"));
         }
+    }
+
+    private void processMixQuery(GroupMessageEvent event) {
+
     }
 
 //    @NotNull

@@ -48,7 +48,7 @@ public class DiscordEventHandlers {
             if (StringUtils.hasText(message.getContent())){
                 msgList.add("\n"+message.getContent());
                 //翻译
-                msgList.add("[机翻:"+translator.translateEn2Cn(message.getContent())+"]");
+                msgList.add("\n[机翻:"+translator.translateEn2Cn(message.getContent())+"]");
             }
             //附件 一般是图片
             Set<Attachment> attachments = message.getAttachments();
@@ -65,12 +65,12 @@ public class DiscordEventHandlers {
                     embed.getAuthor().ifPresent(author -> msgList.add("\n作者："+author.getName()+""));
                     embed.getTitle().ifPresent(title -> {
                         msgList.add("\n标题："+title+"");
-                        msgList.add("[机翻："+translator.translateEn2Cn(title)+"]");
+                        msgList.add("\n[机翻："+translator.translateEn2Cn(title)+"]");
                     });
                     embed.getDescription().filter(StringUtils::hasText)
                             .ifPresent(des -> {
                                 msgList.add("\n描述："+des);
-                                msgList.add("[机翻："+translator.translateEn2Cn(des)+"]");
+                                msgList.add("\n[机翻："+translator.translateEn2Cn(des)+"]");
                             });
                     embed.getImage().ifPresent(image -> {
                         try {
