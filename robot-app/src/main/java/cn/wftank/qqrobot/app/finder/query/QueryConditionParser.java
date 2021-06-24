@@ -1,6 +1,7 @@
 package cn.wftank.qqrobot.app.finder.query;
 
 import cn.wftank.search.WFtankSearcher;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
@@ -15,6 +16,7 @@ import java.util.Map;
  * @create: 2021-06-24 15:22
  * @description: 将querysession中的查询条件转换成lucene查询他条件
  **/
+@Slf4j
 public class QueryConditionParser {
 
     public static BooleanQuery parseConditionMap(Map<QueryConditionTypeEnum, List<String>> conditionMap, WFtankSearcher searcher){
@@ -41,6 +43,9 @@ public class QueryConditionParser {
                     default:
                         for (String value : valueList) {
                             typeQueryBuilder.add(new TermQuery(new Term(typeEnum.getDefaultFieldName(),value)), BooleanClause.Occur.SHOULD);
+                        }
+                        if (typeEnum.equals(QueryConditionTypeEnum.TYPE)){
+                            log.info("show_type_key:"+valueList);
                         }
                         break;
                 }
