@@ -19,7 +19,7 @@ public enum QueryConditionTypeEnum {
     NAME(1,"name_cn","名称","发送中文英文均可"),
     SIZE(2,"size","尺寸","发送数字即可"),
     GRADE(3,"grade","等级","发送数字即可，数字越小，商品品质越好，最小值为1，最大值为4"),
-    TYPE(4,"type","商品类型",""),
+    TYPE(4,"show_type_key","商品类型",""),
     ;
 
     //索引值,用于输入
