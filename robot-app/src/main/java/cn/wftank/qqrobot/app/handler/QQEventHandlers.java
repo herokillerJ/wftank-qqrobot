@@ -1,23 +1,26 @@
 package cn.wftank.qqrobot.app.handler;
 
 import cn.wftank.qqrobot.app.finder.SCDataFinder;
+import cn.wftank.qqrobot.app.finder.query.QQMixQueryManager;
+import cn.wftank.qqrobot.app.finder.query.QQMixQuerySession;
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.app.model.vo.ProductRentShopVO;
 import cn.wftank.qqrobot.app.model.vo.ProductShopVO;
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
+import cn.wftank.search.WFtankSearcher;
 import kotlin.coroutines.CoroutineContext;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.message.data.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -31,6 +34,10 @@ public class QQEventHandlers extends SimpleListenerHost {
     private static final Logger log = LoggerFactory.getLogger(QQEventHandlers.class);
     @Autowired
     private SCDataFinder scDataFinder;
+    @Autowired
+    private QQMixQueryManager qqMixQueryManager;
+    @Autowired
+    private WFtankSearcher wftankSearcher;
 
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception){
@@ -69,8 +76,42 @@ public class QQEventHandlers extends SimpleListenerHost {
         if (isAtBot){
             processCommand(event, content);
         }else{
-            //通过正则确定是否在问商品信息
-            processAutoFind(event, content);
+            //如果当前用户存在高级查询会话则走查询,否则走自动搜索
+            long qq = event.getSender().getId();
+            if (null != qqMixQueryManager.get(qq)){
+                processMixQuery(event, content);
+            }else{
+                //通过正则确定是否在问商品信息
+                processAutoFind(event, content);
+            }
+
+        }
+    }
+
+    private void processMixQuery(GroupMessageEvent event, String content) {
+        long qq = event.getSender().getId();
+        if (StringUtils.isNotBlank(content)){
+            content = StringUtils.trim(content);
+            QQMixQuerySession qqMixQuerySession = qqMixQueryManager.get(qq);
+            QuoteReply quote = new QuoteReply(event.getSource());
+            if (QQMixQuerySession.STOP_FLAG.equals(content)){
+                List<String> result = qqMixQuerySession.doQuery();
+                if (CollectionUtils.isEmpty(result)){
+                    event.getGroup().sendMessage(quote.plus("未查询到任何商品"));
+                }else{
+                    StringBuilder sb = new StringBuilder("小助手已为您查询到以下商品：\n");
+                    for (String eachMsg :  result) {
+                        sb.append(eachMsg);
+                    }
+                    event.getGroup().sendMessage(quote.plus(sb));
+                }
+
+            }else{
+                MessageChain messageChain = qqMixQuerySession.addQueryCondition(event, content);
+                if (null != messageChain){
+                    event.getGroup().sendMessage(quote.plus(messageChain));
+                }
+            }
         }
     }
 
@@ -138,8 +179,8 @@ public class QQEventHandlers extends SimpleListenerHost {
             }else{
                 commandKey = content.substring(0,firstSpaceIndex);
             }
-            if ("复合查询".equalsIgnoreCase(commandKey)){
-                processMixQuery(event);
+            if ("高级查询".equalsIgnoreCase(commandKey)){
+                processCreateMixQuery(event);
             }
             if ("帮助".equalsIgnoreCase(commandKey)){
                 final QuoteReply quote = new QuoteReply(event.getSource());
@@ -154,8 +195,9 @@ public class QQEventHandlers extends SimpleListenerHost {
         }
     }
 
-    private void processMixQuery(GroupMessageEvent event) {
-
+    private void processCreateMixQuery(GroupMessageEvent event) {
+        long qq = event.getSender().getId();
+        qqMixQueryManager.put(qq,new QQMixQuerySession(qq, wftankSearcher));
     }
 
 //    @NotNull

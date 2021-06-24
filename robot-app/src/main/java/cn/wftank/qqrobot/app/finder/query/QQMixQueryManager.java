@@ -22,7 +22,6 @@ public class QQMixQueryManager {
     private final Cache<Long, QQMixQuerySession> sessionCache = Caffeine.newBuilder()
             .maximumSize(10000)
             .expireAfterWrite(expireSecond, TimeUnit.MINUTES)
-//            .refreshAfterWrite(1, TimeUnit.MINUTES)
             .build();
 
     /**
