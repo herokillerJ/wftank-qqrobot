@@ -43,9 +43,12 @@ public class QueryConditionParser {
                     default:
                         for (String value : valueList) {
                             typeQueryBuilder.add(new TermQuery(new Term(typeEnum.getDefaultFieldName(),value)), BooleanClause.Occur.SHOULD);
+                            if (typeEnum.equals(QueryConditionTypeEnum.TYPE)){
+                                log.info(""+searcher.analizeString(value));
+                            }
                         }
                         if (typeEnum.equals(QueryConditionTypeEnum.TYPE)){
-                            log.info("show_type_key:"+valueList);
+                            log.info(typeEnum.getDefaultFieldName()+":"+valueList);
                         }
                         break;
                 }
