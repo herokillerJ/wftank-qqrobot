@@ -150,7 +150,7 @@ public class QQMixQuerySession {
                 sb.append("\n"+conditionType.getIndex()+"："+conditionType.getName());
             }
             sb.append("\n或输入"+STOP_FLAG+"结束查询");
-
+            chainBuilder.add(new PlainText(sb));
         }
         return chainBuilder.build();
     }
