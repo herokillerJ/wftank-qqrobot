@@ -102,7 +102,7 @@ public class QQEventHandlers extends SimpleListenerHost {
                 }else{
                     StringBuilder sb = new StringBuilder("小助手已为您查询到以下商品：\n");
                     for (String eachMsg :  result) {
-                        sb.append(eachMsg);
+                        sb.append("\n"+eachMsg);
                     }
                     event.getGroup().sendMessage(quote.plus(sb));
                 }
@@ -114,6 +114,7 @@ public class QQEventHandlers extends SimpleListenerHost {
                 }
             }
         }
+        qqMixQueryManager.remove(qq);
     }
 
     private void processAutoFind(GroupMessageEvent event, String content) {
