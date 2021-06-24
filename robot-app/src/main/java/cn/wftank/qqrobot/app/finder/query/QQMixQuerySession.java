@@ -97,7 +97,7 @@ public class QQMixQuerySession {
         //组装查询条件
         //最多显示10条,太多了QQ群就刷屏了
         int num = 1;
-        List<Document> resultDoc = wftankSearcher.search(QueryConditionParser.parseConditionMap(conditionMap), 10);
+        List<Document> resultDoc = wftankSearcher.search(QueryConditionParser.parseConditionMap(conditionMap,wftankSearcher), 10);
         if (CollectionUtils.isNotEmpty(resultDoc)){
             for (Document doc : resultDoc) {
                 result.add(""+num + "：" +doc.get("name_cn")+"["+doc.get("name")+"]");

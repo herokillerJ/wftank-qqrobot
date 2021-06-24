@@ -1,5 +1,6 @@
 package cn.wftank.qqrobot.app.finder.query;
 
+import cn.wftank.search.WFtankSearcher;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
@@ -16,7 +17,7 @@ import java.util.Map;
  **/
 public class QueryConditionParser {
 
-    public static BooleanQuery parseConditionMap(Map<QueryConditionTypeEnum, List<String>> conditionMap){
+    public static BooleanQuery parseConditionMap(Map<QueryConditionTypeEnum, List<String>> conditionMap, WFtankSearcher searcher){
         BooleanQuery.Builder rootQuery = new BooleanQuery.Builder();
         for (Map.Entry<QueryConditionTypeEnum, List<String>> entry : conditionMap.entrySet()) {
             QueryConditionTypeEnum typeEnum = entry.getKey();
@@ -26,8 +27,15 @@ public class QueryConditionParser {
                 switch (typeEnum){
                     case NAME:
                         for (String value : valueList) {
-                            typeQueryBuilder.add(new TermQuery(new Term("name",value)), BooleanClause.Occur.SHOULD);
-                            typeQueryBuilder.add(new TermQuery(new Term("name_cn",value)), BooleanClause.Occur.SHOULD);
+                            //分词
+                            List<String> keywords = searcher.analizeString(value);
+                            if (CollectionUtils.isNotEmpty(keywords)){
+                                for (String keyword : keywords) {
+                                    typeQueryBuilder.add(new TermQuery(new Term("name",keyword)), BooleanClause.Occur.SHOULD);
+                                    typeQueryBuilder.add(new TermQuery(new Term("name_cn",keyword)), BooleanClause.Occur.SHOULD);
+                                }
+
+                            }
                         }
                         break;
                     default:
@@ -37,11 +45,8 @@ public class QueryConditionParser {
                         break;
                 }
                 BooleanQuery typeQuery = typeQueryBuilder.build();
-                //类型的查询必须是must
                 rootQuery.add(typeQuery, BooleanClause.Occur.MUST);
             }
-
-
         }
         return rootQuery.build();
     }
