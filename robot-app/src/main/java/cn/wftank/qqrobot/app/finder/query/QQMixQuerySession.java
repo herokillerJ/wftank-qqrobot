@@ -118,7 +118,7 @@ public class QQMixQuerySession {
         if (validValueInput(content, chainBuilder)){
             if (QueryConditionTypeEnum.TYPE.equals(curTypeEnum)) {
                 Integer typeCode = Integer.valueOf(content);
-                conditionMap.get(curTypeEnum).add(ProductTypeEnum.get(typeCode).getName());
+                conditionMap.get(curTypeEnum).add(ProductTypeEnum.getByCode(typeCode).getName());
             }else {
                 conditionMap.get(curTypeEnum).add(content);
             }
@@ -133,7 +133,7 @@ public class QQMixQuerySession {
                         if (QueryConditionTypeEnum.TYPE.equals(type)){
                             //如果是商品类型，将数字转换成类型名称
                             String typeValueStr = valueList.stream()
-                                    .map(typeIndex -> ProductTypeEnum.get(Integer.valueOf(typeIndex)).getNameCn())
+                                    .map(typeName -> ProductTypeEnum.getByName(typeName).getNameCn())
                                     .collect(Collectors.joining("，"));
                             sb.append("\n"+ type.getName()+"："+typeValueStr);
                         }else{
@@ -163,7 +163,7 @@ public class QQMixQuerySession {
         if (QueryConditionTypeEnum.TYPE.equals(curTypeEnum)){
             try {
                 Integer typeCode = Integer.valueOf(content);
-                ProductTypeEnum productTypeEnum = ProductTypeEnum.get(typeCode);
+                ProductTypeEnum productTypeEnum = ProductTypeEnum.getByCode(typeCode);
                 if (null == productTypeEnum){
                     throw new RuntimeException();
                 }

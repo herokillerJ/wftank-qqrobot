@@ -33,15 +33,21 @@ public enum ProductTypeEnum {
     private String nameCn;
 
     private static final Map<Integer, ProductTypeEnum> LOOKUP = new LinkedHashMap<>();
+    private static final Map<String, ProductTypeEnum> NAME_LOOKUP = new LinkedHashMap<>();
 
     static {
         for (ProductTypeEnum e : ProductTypeEnum.values()) {
             LOOKUP.put(e.index, e);
+            NAME_LOOKUP.put(e.name,e);
         }
     }
 
-    public static ProductTypeEnum get(Integer code) {
+    public static ProductTypeEnum getByCode(Integer code) {
         return LOOKUP.get(code);
+    }
+
+    public static ProductTypeEnum getByName(String name) {
+        return NAME_LOOKUP.get(name);
     }
 
 }
