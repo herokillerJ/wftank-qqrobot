@@ -36,19 +36,24 @@ public class QueryConditionParser {
                                     typeQueryBuilder.add(new TermQuery(new Term("name",keyword)), BooleanClause.Occur.SHOULD);
                                     typeQueryBuilder.add(new TermQuery(new Term("name_cn",keyword)), BooleanClause.Occur.SHOULD);
                                 }
-
+                            }
+                        }
+                        break;
+                    case TYPE:
+                        //由于类型在入索引时也分词了,所以这里也需要分词
+                        for (String value : valueList) {
+                            //分词
+                            List<String> keywords = searcher.analizeString(value);
+                            if (CollectionUtils.isNotEmpty(keywords)){
+                                for (String keyword : keywords) {
+                                    typeQueryBuilder.add(new TermQuery(new Term(typeEnum.getDefaultFieldName(),keyword)), BooleanClause.Occur.SHOULD);
+                                }
                             }
                         }
                         break;
                     default:
                         for (String value : valueList) {
                             typeQueryBuilder.add(new TermQuery(new Term(typeEnum.getDefaultFieldName(),value)), BooleanClause.Occur.SHOULD);
-                            if (typeEnum.equals(QueryConditionTypeEnum.TYPE)){
-                                log.info(""+searcher.analizeString(value));
-                            }
-                        }
-                        if (typeEnum.equals(QueryConditionTypeEnum.TYPE)){
-                            log.info(typeEnum.getDefaultFieldName()+":"+valueList);
                         }
                         break;
                 }
