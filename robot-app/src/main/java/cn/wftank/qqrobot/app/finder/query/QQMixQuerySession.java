@@ -125,7 +125,11 @@ public class QQMixQuerySession {
             //正确选择时需要切换操作类型
             switchQueryStatus();
             StringBuilder sb = new StringBuilder("您已添加查询条件：");
-            sb.append(curTypeEnum.getName()+"："+content);
+            if (QueryConditionTypeEnum.TYPE.equals(curTypeEnum)){
+                sb.append(curTypeEnum.getName()+"："+ProductTypeEnum.getByCode(Integer.valueOf(content)));
+            }else{
+                sb.append(curTypeEnum.getName()+"："+content);
+            }
             if (MapUtils.isNotEmpty(conditionMap)){
                 sb.append("\n目前的查询条件如下：");
                 conditionMap.forEach((type,valueList) -> {
