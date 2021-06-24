@@ -3,6 +3,7 @@ package cn.wftank.qqrobot.app.handler;
 import cn.wftank.qqrobot.app.finder.SCDataFinder;
 import cn.wftank.qqrobot.app.finder.query.QQMixQueryManager;
 import cn.wftank.qqrobot.app.finder.query.QQMixQuerySession;
+import cn.wftank.qqrobot.app.finder.query.QueryConditionTypeEnum;
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.app.model.vo.ProductRentShopVO;
 import cn.wftank.qqrobot.app.model.vo.ProductShopVO;
@@ -179,6 +180,7 @@ public class QQEventHandlers extends SimpleListenerHost {
             }else{
                 commandKey = content.substring(0,firstSpaceIndex);
             }
+            log.info("收到指令:"+commandKey);
             if ("高级查询".equalsIgnoreCase(commandKey)){
                 processCreateMixQuery(event);
             }
@@ -198,6 +200,14 @@ public class QQEventHandlers extends SimpleListenerHost {
     private void processCreateMixQuery(GroupMessageEvent event) {
         long qq = event.getSender().getId();
         qqMixQueryManager.put(qq,new QQMixQuerySession(qq, wftankSearcher));
+        QuoteReply quoteReply = new QuoteReply(event.getSource());
+        String createMixMsg = "您以创建高级查询，请选择如下查询条件，发送他们的编号即可，无需回复本条消息";
+        QueryConditionTypeEnum[] values = QueryConditionTypeEnum.values();
+        for (int i = 0; i < values.length; i++) {
+            QueryConditionTypeEnum conditionType = values[i];
+            createMixMsg += "\n"+conditionType.getIndex()+"："+conditionType.getName();
+        }
+        event.getGroup().sendMessage(quoteReply.plus(createMixMsg));
     }
 
 //    @NotNull
