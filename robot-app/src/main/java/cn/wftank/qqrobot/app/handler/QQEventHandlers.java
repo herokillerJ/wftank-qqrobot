@@ -91,32 +91,33 @@ public class QQEventHandlers extends SimpleListenerHost {
 
     private void processMixQuery(GroupMessageEvent event, String content) {
         long qq = event.getSender().getId();
-        try {
-            if (StringUtils.isNotBlank(content)){
-                content = StringUtils.trim(content);
-                QQMixQuerySession qqMixQuerySession = qqMixQueryManager.get(qq);
-                QuoteReply quote = new QuoteReply(event.getSource());
-                if (QQMixQuerySession.STOP_FLAG.equals(content)){
-                    List<String> result = qqMixQuerySession.doQuery();
-                    if (CollectionUtils.isEmpty(result)){
-                        event.getGroup().sendMessage(quote.plus("未查询到任何商品"));
-                    }else{
-                        StringBuilder sb = new StringBuilder("小助手已为您查询到以下商品：\n");
-                        for (String eachMsg :  result) {
-                            sb.append("\n"+eachMsg);
-                        }
-                        event.getGroup().sendMessage(quote.plus(sb));
-                    }
-
+        if (StringUtils.isNotBlank(content)){
+            content = StringUtils.trim(content);
+            QQMixQuerySession qqMixQuerySession = qqMixQueryManager.get(qq);
+            QuoteReply quote = new QuoteReply(event.getSource());
+            if (QQMixQuerySession.STOP_FLAG.equals(content)){
+                List<String> result = null;
+                try {
+                    result = qqMixQuerySession.doQuery();
+                }finally {
+                    qqMixQueryManager.remove(qq);
+                }
+                if (CollectionUtils.isEmpty(result)){
+                    event.getGroup().sendMessage(quote.plus("未查询到任何商品"));
                 }else{
-                    MessageChain messageChain = qqMixQuerySession.addQueryCondition(event, content);
-                    if (null != messageChain){
-                        event.getGroup().sendMessage(quote.plus(messageChain));
+                    StringBuilder sb = new StringBuilder("小助手已为您查询到以下商品：\n");
+                    for (String eachMsg :  result) {
+                        sb.append("\n"+eachMsg);
                     }
+                    event.getGroup().sendMessage(quote.plus(sb));
+                }
+
+            }else{
+                MessageChain messageChain = qqMixQuerySession.addQueryCondition(event, content);
+                if (null != messageChain){
+                    event.getGroup().sendMessage(quote.plus(messageChain));
                 }
             }
-        }finally {
-            qqMixQueryManager.remove(qq);
         }
     }
 
