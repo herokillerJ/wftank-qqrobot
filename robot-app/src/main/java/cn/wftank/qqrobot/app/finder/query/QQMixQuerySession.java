@@ -10,12 +10,14 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.lucene.document.Document;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author: wftank
@@ -122,6 +124,33 @@ public class QQMixQuerySession {
             }
             //正确选择时需要切换操作类型
             switchQueryStatus();
+            StringBuilder sb = new StringBuilder("您已添加查询条件：");
+            sb.append(curTypeEnum.getName()+"："+content);
+            if (MapUtils.isNotEmpty(conditionMap)){
+                sb.append("\n目前的查询条件如下：");
+                conditionMap.forEach((type,valueList) -> {
+                    if (CollectionUtils.isNotEmpty(valueList)){
+                        if (QueryConditionTypeEnum.TYPE.equals(type)){
+                            //如果是商品类型，将数字转换成类型名称
+                            String typeValueStr = valueList.stream()
+                                    .map(typeIndex -> ProductTypeEnum.get(Integer.valueOf(typeIndex)).getNameCn())
+                                    .collect(Collectors.joining("，"));
+                            sb.append("\n"+ type.getName()+"："+typeValueStr);
+                        }else{
+                            sb.append("\n"+ type.getName()+"："+valueList.stream().collect(Collectors.joining("，")));
+                        }
+                    }
+
+                });
+            }
+            sb.append("\n"+"请继续添加以下条件，输入编号即可：");
+            QueryConditionTypeEnum[] values = QueryConditionTypeEnum.values();
+            for (int i = 0; i < values.length; i++) {
+                QueryConditionTypeEnum conditionType = values[i];
+                sb.append("\n"+conditionType.getIndex()+"："+conditionType.getName());
+            }
+            sb.append("\n或输入"+STOP_FLAG+"结束查询");
+
         }
         return chainBuilder.build();
     }
