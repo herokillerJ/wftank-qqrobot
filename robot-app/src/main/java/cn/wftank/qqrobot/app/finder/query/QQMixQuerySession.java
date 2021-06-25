@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
+import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
@@ -17,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +37,11 @@ public class QQMixQuerySession {
     public static final String STOP_FLAG = "-1";
 
     private WFtankSearcher wftankSearcher;
+
+    /**
+     * 用于撤回之前没用的消息
+     */
+    private AtomicReference<MessageReceipt> lastMessageToRecall = new AtomicReference<>();
 
     public QQMixQuerySession(long qq, WFtankSearcher wftankSearcher) {
         this.qq = qq;

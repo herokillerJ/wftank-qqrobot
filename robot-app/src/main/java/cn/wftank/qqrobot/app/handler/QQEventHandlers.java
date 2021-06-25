@@ -14,6 +14,7 @@ import kotlin.coroutines.CoroutineContext;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,11 +92,14 @@ public class QQEventHandlers extends SimpleListenerHost {
 
     private void processMixQuery(GroupMessageEvent event, String content) {
         long qq = event.getSender().getId();
+        QQMixQuerySession qqMixQuerySession = null;
         if (StringUtils.isNotBlank(content)){
+            Message responseMsg = null;
             content = StringUtils.trim(content);
-            QQMixQuerySession qqMixQuerySession = qqMixQueryManager.get(qq);
+            qqMixQuerySession = qqMixQueryManager.get(qq);
             QuoteReply quote = new QuoteReply(event.getSource());
             if (QQMixQuerySession.STOP_FLAG.equals(content)){
+                //结束查询
                 List<String> result = null;
                 try {
                     result = qqMixQuerySession.doQuery();
@@ -109,16 +113,28 @@ public class QQEventHandlers extends SimpleListenerHost {
                     for (String eachMsg :  result) {
                         sb.append("\n"+eachMsg);
                     }
-                    event.getGroup().sendMessage(quote.plus(sb));
+                    responseMsg = quote.plus(sb.toString());
                 }
-
             }else{
+                //非结束查询,说明是添加条件或者添加值
                 MessageChain messageChain = qqMixQuerySession.addQueryCondition(event, content);
                 if (null != messageChain){
-                    event.getGroup().sendMessage(quote.plus(messageChain));
+                    responseMsg = quote.plus(messageChain);
                 }
             }
+            if (null != responseMsg){
+                if (null != qqMixQuerySession){
+                    qqMixQuerySession.getLastMessageToRecall();
+                    MessageReceipt lastMsg = qqMixQuerySession.getLastMessageToRecall().get();
+                    if (null != lastMsg){
+                        MessageSource.recall(lastMsg.getSource());
+                    }
+                }
+                MessageReceipt messageReceipt = event.getGroup().sendMessage(responseMsg);
+                qqMixQuerySession.getLastMessageToRecall().set(messageReceipt);
+            }
         }
+
     }
 
     private void processAutoFind(GroupMessageEvent event, String content) {
@@ -204,7 +220,8 @@ public class QQEventHandlers extends SimpleListenerHost {
 
     private void processCreateMixQuery(GroupMessageEvent event) {
         long qq = event.getSender().getId();
-        qqMixQueryManager.put(qq,new QQMixQuerySession(qq, wftankSearcher));
+        QQMixQuerySession qqMixQuerySession = new QQMixQuerySession(qq, wftankSearcher);
+        qqMixQueryManager.put(qq,qqMixQuerySession);
         QuoteReply quoteReply = new QuoteReply(event.getSource());
         String createMixMsg = "您以创建高级查询，请选择如下查询条件，发送他们的编号即可，无需回复本条消息";
         QueryConditionTypeEnum[] values = QueryConditionTypeEnum.values();
@@ -212,7 +229,8 @@ public class QQEventHandlers extends SimpleListenerHost {
             QueryConditionTypeEnum conditionType = values[i];
             createMixMsg += "\n"+conditionType.getIndex()+"："+conditionType.getName();
         }
-        event.getGroup().sendMessage(quoteReply.plus(createMixMsg));
+        MessageReceipt messageReceipt = event.getGroup().sendMessage(quoteReply.plus(createMixMsg));
+        qqMixQuerySession.getLastMessageToRecall().set(messageReceipt);
     }
 
 //    @NotNull
