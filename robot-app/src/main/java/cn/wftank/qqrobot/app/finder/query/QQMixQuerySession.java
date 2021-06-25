@@ -133,7 +133,7 @@ public class QQMixQuerySession {
             switchQueryStatus();
             StringBuilder sb = new StringBuilder("您已添加查询条件：");
             if (QueryConditionTypeEnum.TYPE.equals(curTypeEnum)){
-                sb.append(curTypeEnum.getName()+"："+ProductTypeEnum.getByCode(Integer.valueOf(content)).getName());
+                sb.append(curTypeEnum.getName()+"--"+ProductTypeEnum.getByCode(Integer.valueOf(content)).getName());
             }else{
                 sb.append(curTypeEnum.getName()+"："+content);
             }
