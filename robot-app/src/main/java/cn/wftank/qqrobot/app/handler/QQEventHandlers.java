@@ -133,7 +133,7 @@ public class QQEventHandlers extends SimpleListenerHost {
                     qqMixQuerySession.getLastMessageToRecall();
                     MessageReceipt lastMsg = qqMixQuerySession.getLastMessageToRecall().get();
                     if (null != lastMsg){
-                        MessageSource.recallIn(lastMsg.getSource(),3000);
+                        MessageSource.recallIn(lastMsg.getSource(),1000);
                     }
                 }
                 MessageReceipt messageReceipt = event.getGroup().sendMessage(responseMsg);
