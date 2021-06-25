@@ -135,7 +135,7 @@ public class QQMixQuerySession {
             if (QueryConditionTypeEnum.TYPE.equals(curTypeEnum)){
                 sb.append(curTypeEnum.getName()+"--"+ProductTypeEnum.getByCode(Integer.valueOf(content)).getName());
             }else{
-                sb.append(curTypeEnum.getName()+"："+content);
+                sb.append(curTypeEnum.getName()+"--"+content);
             }
             if (MapUtils.isNotEmpty(conditionMap)){
                 sb.append("\n目前的查询条件如下：");
