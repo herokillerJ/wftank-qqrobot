@@ -97,8 +97,11 @@ public class QQEventHandlers extends SimpleListenerHost {
             Message responseMsg = null;
             content = StringUtils.trim(content);
             qqMixQuerySession = qqMixQueryManager.get(qq);
+            boolean stopMsgRecallFlag = false;
             QuoteReply quote = new QuoteReply(event.getSource());
             if (QQMixQuerySession.STOP_FLAG.equals(content)){
+                //结果也要撤回
+                stopMsgRecallFlag = true;
                 //结束查询
                 List<String> result = null;
                 try {
@@ -130,11 +133,14 @@ public class QQEventHandlers extends SimpleListenerHost {
                     qqMixQuerySession.getLastMessageToRecall();
                     MessageReceipt lastMsg = qqMixQuerySession.getLastMessageToRecall().get();
                     if (null != lastMsg){
-                        MessageSource.recall(lastMsg.getSource());
+                        MessageSource.recallIn(lastMsg.getSource(),3000);
                     }
                 }
                 MessageReceipt messageReceipt = event.getGroup().sendMessage(responseMsg);
                 qqMixQuerySession.getLastMessageToRecall().set(messageReceipt);
+                if (stopMsgRecallFlag){
+                    MessageSource.recallIn(messageReceipt.getSource(),1000*30);
+                }
             }
         }
 
