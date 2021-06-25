@@ -201,16 +201,21 @@ public class QQMixQuerySession {
             curTypeEnum = conditionTypeEnum;
             conditionMap.putIfAbsent(conditionTypeEnum, new LinkedList<>());
             chainBuilder.add(new PlainText("您已选择根据 ["+ conditionTypeEnum.getName() +"]条件搜索，"));
+            //拼接提示信息
             if (QueryConditionTypeEnum.GRADE.equals(conditionTypeEnum)) {
                 chainBuilder.add(new PlainText("请输入1~4之间的整数值，1代表最好，4代表最差。"));
             }else if(QueryConditionTypeEnum.TYPE.equals(conditionTypeEnum)) {
-                String typeMsg = "请输入以下类型对应的编号：\n";
+                String typeMsg = "请输入以下类型对应的数字编号：\n";
                 ProductTypeEnum[] productTypeEnums = ProductTypeEnum.values();
                 for (int i = 0; i < productTypeEnums.length; i++) {
                     ProductTypeEnum productTypeEnum = productTypeEnums[i];
                     typeMsg += "\t"+productTypeEnum.getIndex()+"："+productTypeEnum.getNameCn();
                 }
                 chainBuilder.add(new PlainText(typeMsg));
+            }else if(QueryConditionTypeEnum.NAME.equals(conditionTypeEnum)) {
+                chainBuilder.add(new PlainText("\n请直接输入名字的中文或者英文，例如\"先锋\"、\"钻石\"等等"));
+            }else if(QueryConditionTypeEnum.SIZE.equals(conditionTypeEnum)) {
+                chainBuilder.add(new PlainText("\n请直接输入尺寸数字，例如S1,输入\"1\""));
             }
             chainBuilder.add(new PlainText("\n直接发送想要搜索的内容即可，不要回复本条消息。如果弄不明白了,发送"+STOP_FLAG+"结束本次查询"));
             //正确选择时需要切换操作类型

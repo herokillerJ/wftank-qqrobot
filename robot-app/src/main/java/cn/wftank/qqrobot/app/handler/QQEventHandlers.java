@@ -78,6 +78,9 @@ public class QQEventHandlers extends SimpleListenerHost {
         if (isAtBot){
             processCommand(event, content);
         }else{
+            if (content.equalsIgnoreCase("gj")){
+                processCreateMixQuery(event);
+            }
             //如果当前用户存在高级查询会话则走查询,否则走自动搜索
             long qq = event.getSender().getId();
             if (null != qqMixQueryManager.get(qq)){
@@ -210,15 +213,15 @@ public class QQEventHandlers extends SimpleListenerHost {
             }else{
                 commandKey = content.substring(0,firstSpaceIndex);
             }
-            log.info("收到指令:"+commandKey);
             if ("高级查询".equalsIgnoreCase(commandKey)){
                 processCreateMixQuery(event);
-            }
-            if ("帮助".equalsIgnoreCase(commandKey)){
-                final QuoteReply quote = new QuoteReply(event.getSource());
+            }else if ("帮助".equalsIgnoreCase(commandKey)){
+                QuoteReply quote = new QuoteReply(event.getSource());
                 event.getGroup().sendMessage(quote
                         .plus("普通查询：不用@小助手，直接发：\"xxx在哪买\"即可搜索商品,例：\n")
                         .plus("水星在哪买\n"));
+            }else if ("gj".equalsIgnoreCase(commandKey)){
+                processCreateMixQuery(event);
             }
         }else{
             final QuoteReply quote = new QuoteReply(event.getSource());
