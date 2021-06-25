@@ -107,7 +107,7 @@ public class QQEventHandlers extends SimpleListenerHost {
                     qqMixQueryManager.remove(qq);
                 }
                 if (CollectionUtils.isEmpty(result)){
-                    event.getGroup().sendMessage(quote.plus("未查询到任何商品"));
+                    responseMsg = quote.plus("未查询到任何商品");
                 }else{
                     StringBuilder sb = new StringBuilder("小助手已为您查询到以下商品：\n");
                     for (String eachMsg :  result) {
@@ -123,6 +123,9 @@ public class QQEventHandlers extends SimpleListenerHost {
                 }
             }
             if (null != responseMsg){
+                //撤回用户发送的消息
+                MessageSource.recall(event.getSource());
+                //撤回机器人上次发送的消息
                 if (null != qqMixQuerySession){
                     qqMixQuerySession.getLastMessageToRecall();
                     MessageReceipt lastMsg = qqMixQuerySession.getLastMessageToRecall().get();
