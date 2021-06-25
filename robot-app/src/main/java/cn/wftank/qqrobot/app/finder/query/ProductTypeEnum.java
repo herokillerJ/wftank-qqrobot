@@ -20,7 +20,7 @@ public enum ProductTypeEnum {
     SHIELD(4,"Shield","护盾"),
     POWERPLANT(5,"PowerPlant","发电机"),
     QUANTUMDRIVE(6,"QuantumDrive","量子引擎"),
-    GUN(7,"Gun","机炮"),
+    GUN(7,"WeaponGun","机炮"),
     MININGLASER(8,"MiningLaser","采矿激光"),
     TURRET(9,"Turret","炮塔"),
     COOLER(10,"Cooler","散热器"),

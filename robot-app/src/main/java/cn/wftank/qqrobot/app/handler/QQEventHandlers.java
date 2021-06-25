@@ -226,12 +226,13 @@ public class QQEventHandlers extends SimpleListenerHost {
         QQMixQuerySession qqMixQuerySession = new QQMixQuerySession(qq, wftankSearcher);
         qqMixQueryManager.put(qq,qqMixQuerySession);
         QuoteReply quoteReply = new QuoteReply(event.getSource());
-        String createMixMsg = "您以创建高级查询，请选择如下查询条件，发送他们的编号即可，无需回复本条消息";
+        String createMixMsg = "您已创建高级查询，请选择如下查询条件，发送他们的编号即可，无需回复本条消息";
         QueryConditionTypeEnum[] values = QueryConditionTypeEnum.values();
         for (int i = 0; i < values.length; i++) {
             QueryConditionTypeEnum conditionType = values[i];
             createMixMsg += "\n"+conditionType.getIndex()+"："+conditionType.getName();
         }
+        createMixMsg+="\n在查询期间，您发送的消息均会被撤回，如需取消查询，请发送"+QQMixQuerySession.STOP_FLAG;
         MessageReceipt messageReceipt = event.getGroup().sendMessage(quoteReply.plus(createMixMsg));
         qqMixQuerySession.getLastMessageToRecall().set(messageReceipt);
     }
