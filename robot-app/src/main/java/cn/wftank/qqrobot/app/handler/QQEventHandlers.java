@@ -80,16 +80,16 @@ public class QQEventHandlers extends SimpleListenerHost {
         }else{
             if (content.equalsIgnoreCase("gj")){
                 processCreateMixQuery(event);
-            }
-            //如果当前用户存在高级查询会话则走查询,否则走自动搜索
-            long qq = event.getSender().getId();
-            if (null != qqMixQueryManager.get(qq)){
-                processMixQuery(event, content);
             }else{
-                //通过正则确定是否在问商品信息
-                processAutoFind(event, content);
+                //如果当前用户存在高级查询会话则走查询,否则走自动搜索
+                long qq = event.getSender().getId();
+                if (null != qqMixQueryManager.get(qq)){
+                    processMixQuery(event, content);
+                }else{
+                    //通过正则确定是否在问商品信息
+                    processAutoFind(event, content);
+                }
             }
-
         }
     }
 
