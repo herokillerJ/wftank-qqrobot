@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -81,16 +82,22 @@ public class WFtankSearcher implements DisposableBean {
      * 刷新索引
      */
     public void reloadIndexFromFile(File[] indexFiles){
-       synchronized (this){
-           this.loadIndexFile(Lists.newArrayList(indexFiles));
-           DirectoryReader oldReader = directoryReaderAtomicReference.get();
-           try {
-               DirectoryReader newReader = DirectoryReader.openIfChanged(oldReader);
-               directoryReaderAtomicReference.set(newReader);
-               indexSearcherAtomicReference.set(new IndexSearcher(newReader));
-           } catch (IOException e) {
-               log.error("reload index error,ex:"+ExceptionUtils.getStackTrace(e));
-           }
+       this.loadIndexFile(Lists.newArrayList(indexFiles));
+       DirectoryReader oldReader = directoryReaderAtomicReference.get();
+       IndexSearcher oldSearcher = indexSearcherAtomicReference.get();
+       try {
+           Optional.ofNullable(DirectoryReader.openIfChanged(oldReader))
+                           .ifPresent(newReader -> {
+                               directoryReaderAtomicReference.compareAndSet(oldReader, newReader);
+                               indexSearcherAtomicReference.compareAndSet(oldSearcher, new IndexSearcher(newReader));
+                               try {
+                                   oldReader.close();
+                               } catch (IOException e) {
+                                   log.error(ExceptionUtils.getStackTrace(e));
+                               }
+                           });
+       } catch (IOException e) {
+           log.error("reload index error,ex:"+ExceptionUtils.getStackTrace(e));
        }
     }
 
@@ -98,16 +105,22 @@ public class WFtankSearcher implements DisposableBean {
      * 刷新索引
      */
     public void reloadIndexFromString(List<String> indexList){
-        synchronized (this){
-            this.loadIndexString(indexList);
-            DirectoryReader oldReader = directoryReaderAtomicReference.get();
-            try {
-                DirectoryReader newReader = DirectoryReader.openIfChanged(oldReader);
-                directoryReaderAtomicReference.set(newReader);
-                indexSearcherAtomicReference.set(new IndexSearcher(newReader));
-            } catch (IOException e) {
-                log.error("reload index error,ex:"+ExceptionUtils.getStackTrace(e));
-            }
+        this.loadIndexString(indexList);
+        DirectoryReader oldReader = directoryReaderAtomicReference.get();
+        IndexSearcher oldSearcher = indexSearcherAtomicReference.get();
+        try {
+            Optional.ofNullable(DirectoryReader.openIfChanged(oldReader))
+                    .ifPresent(newReader -> {
+                        directoryReaderAtomicReference.compareAndSet(oldReader, newReader);
+                        indexSearcherAtomicReference.compareAndSet(oldSearcher, new IndexSearcher(newReader));
+                        try {
+                            oldReader.close();
+                        } catch (IOException e) {
+                            log.error(ExceptionUtils.getStackTrace(e));
+                        }
+                    });
+        } catch (IOException e) {
+            log.error("reload index error,ex:"+ExceptionUtils.getStackTrace(e));
         }
     }
 
