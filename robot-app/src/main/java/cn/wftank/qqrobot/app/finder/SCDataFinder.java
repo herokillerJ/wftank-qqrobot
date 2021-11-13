@@ -89,7 +89,7 @@ public class SCDataFinder {
                         .add(new TermQuery(new Term("name_cn", str)),BooleanClause.Occur.SHOULD);
             });
             BooleanQuery query = builder.build();
-            List<Document> docList = wFtankSearcher.search(query, 50);
+            List<Document> docList = wFtankSearcher.search(query, 10);
             if (CollectionUtils.isNotEmpty(docList)){
                 result.addAll(docList.stream().map(doc -> doc.getField("path").stringValue()).collect(Collectors.toList()));
             }

@@ -12,8 +12,8 @@
   <packaging>jar</packaging>
 
   <properties>
-    <kotlin.version>1.4.32</kotlin.version>
     <logj.version>2.13.1</logj.version>
+    <kotlin.version>1.5.30</kotlin.version>
   </properties>
 
   <dependencies>
@@ -59,18 +59,29 @@
           <artifactId>kotlin-jvm-blocking-bridge-jvm</artifactId>
         </exclusion>
       </exclusions>
-      <version>2.6.2</version> <!-- 替换版本为你需要的版本 -->
+      <version>2.8.0</version> <!-- 替换版本为你需要的版本 -->
     </dependency>
     <dependency>
       <groupId>net.mamoe</groupId>
       <artifactId>kotlin-jvm-blocking-bridge-jvm</artifactId>
-      <version>1.10.2</version>
+      <version>1.10.6</version>
+    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.jetbrains.kotlin</groupId>-->
+<!--      <artifactId>kotlin-stdlib-jdk8</artifactId>-->
+<!--      <version>${kotlin.version}</version>-->
+<!--    </dependency>-->
+    <dependency>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+      <version>1.5.2</version>
     </dependency>
     <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib-jdk8</artifactId>
-      <version>${kotlin.version}</version>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-coroutines-core</artifactId>
+      <version>1.5.2</version>
     </dependency>
+
     <!--<dependency>
       <groupId>net.mamoe</groupId>
       <artifactId>mirai-login-solver-selenium</artifactId>

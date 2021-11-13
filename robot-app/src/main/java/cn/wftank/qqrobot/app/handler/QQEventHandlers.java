@@ -164,7 +164,17 @@ public class QQEventHandlers extends SimpleListenerHost {
             //找到的数量大于1条
             message = message.plus("已为您匹配到"+pathList.size()+"条商品信息")
                     .plus(new Face(Face.WU_YAN_XIAO).plus("\n")).plus("，名字最相近的商品详情如下：\n");
-            JsonProductVO productVO = scDataFinder.getProductInfo(pathList.get(0));
+            JsonProductVO productVO = null;
+            for (String path : pathList) {
+
+                productVO = scDataFinder.getProductInfo(path);
+                if (CollectionUtils.isNotEmpty(productVO.getShopBuy())
+                        || CollectionUtils.isNotEmpty(productVO.getShopRent())
+                            || CollectionUtils.isNotEmpty(productVO.getShopSell())){
+                    break;
+                }
+            }
+
             message = convertProduct(message, productVO);
             message = message.plus("\n如果不正确，还请去https://wftank.cn/search查询");
         }

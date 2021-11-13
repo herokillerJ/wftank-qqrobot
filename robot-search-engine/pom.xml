@@ -51,6 +51,20 @@
       <groupId>com.jianggujin</groupId>
       <artifactId>IKAnalyzer-lucene</artifactId>
       <version>8.0.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.lucene</groupId>
+          <artifactId>lucene-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.lucene</groupId>
+          <artifactId>lucene-queryparser</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.lucene</groupId>
+          <artifactId>lucene-analyzers-common</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
