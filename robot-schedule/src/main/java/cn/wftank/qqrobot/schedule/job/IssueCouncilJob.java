@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +80,7 @@ public class IssueCouncilJob {
                     }
                 }
             }
-            Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8));
+            Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8), StandardOpenOption.SYNC);
             if (!newIssues.isEmpty()){
                 IssueNotifyEvent event = new IssueNotifyEvent();
                 event.setNewIssues(newIssues);

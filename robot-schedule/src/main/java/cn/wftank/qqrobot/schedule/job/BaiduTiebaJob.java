@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -86,6 +87,7 @@ public class BaiduTiebaJob {
                 log.info("g-lao newestPid:"+newestPid);
                 //xpath选择有时会出问题导致所有选择器都是空,这里做下过滤
                 if (StringUtils.isBlank(newestPid)) return;
+                //ruguo
                 if (first){
                     TiebaThread tiebaThread = threads.get(0);
                     newThreads.add(tiebaThread);
@@ -103,7 +105,7 @@ public class BaiduTiebaJob {
                         }
                     }
                 }
-                Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8));
+                Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8), StandardOpenOption.SYNC);
                 if (!newThreads.isEmpty()){
                     TiebaNotifyEvent event = new TiebaNotifyEvent();
                     event.setNewThreads(newThreads);
