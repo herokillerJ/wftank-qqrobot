@@ -37,7 +37,10 @@ public class IssueCouncilJob {
     @Autowired
     private NotifyEventPublisher notifyEventPublisher;
 
-    @Scheduled(fixedDelay = 1000*60)
+    /**
+     * 官方已经更换,这个job没用了
+     */
+//    @Scheduled(fixedDelay = 1000*60)
     public void issueCouncilWatchJob(){
         String jobName = "issue council watch job";
         log.info(jobName+" start");
@@ -72,12 +75,10 @@ public class IssueCouncilJob {
                 if (newestId.equals(latestId)){
                     return;
                 }
+                //改成只取第一个
                 for (ResultsetItem issue : resp.getData().getResultset()) {
-                    if (issue.getId().equals(latestId)){
-                        break;
-                    }else{
-                        newIssues.add(IssueEntityConvertor.convert(issue));
-                    }
+                    newIssues.add(IssueEntityConvertor.convert(issue));
+                    break;
                 }
             }
             Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8), StandardOpenOption.SYNC);

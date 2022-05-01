@@ -130,11 +130,10 @@ public class SpectrumJob {
                     return;
                 }
                 for (ThreadsItem thread : resp.getRespData().getThreads()) {
-                    if (thread.getId().equals(latestId)){
-                        break;
-                    }else{
+                    if (!thread.getId().equals(latestId)){
                         newThreads.add(SpectrumThreadConvertor.convert(thread));
                     }
+                    break;
                 }
             }
             Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8), StandardOpenOption.SYNC);

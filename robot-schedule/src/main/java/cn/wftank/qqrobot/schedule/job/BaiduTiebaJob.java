@@ -95,14 +95,12 @@ public class BaiduTiebaJob {
                     if (newestPid.equals(latestPid)){
                         return;
                     }
+                    //这里改为只取第一个,防止刷屏
                     for (TiebaThread thread : threads) {
-                        if (thread.getPid().equals(latestPid)){
-                            break;
-                        }else{
-                            if (StringUtils.isNotBlank(newestPid)){
-                                newThreads.add(thread);
-                            }
+                        if (!thread.getPid().equals(latestPid)){
+                            newThreads.add(thread);
                         }
+                        break;
                     }
                 }
                 Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8), StandardOpenOption.SYNC);
