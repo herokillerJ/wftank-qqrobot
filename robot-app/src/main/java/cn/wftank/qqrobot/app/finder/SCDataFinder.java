@@ -27,12 +27,14 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+
 public class SCDataFinder {
 
     private List<IndexEntity> indexList = new CopyOnWriteArrayList<>();
@@ -41,10 +43,20 @@ public class SCDataFinder {
     //字符串匹配算法
     private StringDistance similarMatcher = new MetricLCS();
 
-    @Autowired
     private WFtankSearcher wFtankSearcher;
+
+    private AtomicReference<String> currentVersion = new AtomicReference<>();
+
+    public SCDataFinder(@Autowired WFtankSearcher wFtankSearcher) {
+        this.wFtankSearcher = wFtankSearcher;
+    }
+
     {
         patternMap.put(Pattern.compile("(.+)(在|去|到)+.*(哪|那)+.*(买|卖|租)+.*"),1);
+    }
+
+    public String getCurrentVersion() {
+        return currentVersion.get();
     }
 
     public static final String DEFAULT_VERSION = "latest";
@@ -59,19 +71,20 @@ public class SCDataFinder {
      * 一小时刷新一次
      */
     @Scheduled(fixedDelay = 1000*60*60, initialDelay=1000*60*60)
-    private void load(){
+    public void load(){
         log.info("开始重载查询索引");
         long start = System.currentTimeMillis();
         String indexUrl = URL_PREFIX+ GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION) +"/index.json";
         String extIndexUrl = URL_PREFIX+GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION)+"/ext_index.json";
         Index index = OKHttpUtil.get(indexUrl, new TypeReference<Index>() {});
+        currentVersion.getAndSet(index.getVersion());
         List<IndexEntity> mainList = index.getIndex();
         Index extIndex = OKHttpUtil.get(extIndexUrl, new TypeReference<Index>() {});
         mainList.addAll(extIndex.getIndex());
         List<String> indesJsonList = mainList.stream().map(JsonUtil::toJson).collect(Collectors.toList());
         wFtankSearcher.reloadIndexFromString(indesJsonList);
         long end = System.currentTimeMillis();
-        log.info("重载索引完成，耗时：{}秒",(end-start)/1000);
+        log.info("重载索引完成,版本:{}，耗时：{}秒",getCurrentVersion(),(end-start)/1000);
     }
 
     public List<String> search(String keyword){

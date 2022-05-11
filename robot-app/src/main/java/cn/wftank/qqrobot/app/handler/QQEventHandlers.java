@@ -115,7 +115,8 @@ public class QQEventHandlers extends SimpleListenerHost {
                 if (CollectionUtils.isEmpty(result)){
                     responseMsg = quote.plus("未查询到任何商品");
                 }else{
-                    StringBuilder sb = new StringBuilder("小助手已为您查询到以下商品：\n");
+                    String version = "数据版本:"+scDataFinder.getCurrentVersion()+"\n";
+                    StringBuilder sb = new StringBuilder(version+"小助手已为您查询到以下商品：\n");
                     for (String eachMsg :  result) {
                         sb.append("\n"+eachMsg);
                     }
@@ -153,7 +154,8 @@ public class QQEventHandlers extends SimpleListenerHost {
         List<String> pathList = scDataFinder.autoFind(content);
         if (CollectionUtils.isEmpty(pathList)) return;
         MessageChain message = MessageUtils.newChain();
-        message = message.plus("小助手感觉您似乎在询问游戏内的商品购买位置\n");
+        String version = "数据版本:"+scDataFinder.getCurrentVersion()+"\n";
+        message = message.plus(version+"小助手感觉您似乎在询问游戏内的商品购买位置\n");
         final QuoteReply quote = new QuoteReply(event.getSource());
         if (pathList.size() == 1){
             message = message.plus("已为您匹配到了一条商品信息")

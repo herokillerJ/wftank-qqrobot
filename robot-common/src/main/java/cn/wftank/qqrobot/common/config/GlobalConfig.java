@@ -50,7 +50,7 @@ public class GlobalConfig {
             return properties.getProperty(configKey.getKey());
         } catch (IOException e) {
             log.error("加载配置文件:{}出错,请检查配置",CONFIG_NAME);
-            throw new RuntimeException("加载配置文件:{}出错,请检查配置",e);
+            throw new RuntimeException("加载配置文件:"+CONFIG_NAME+"出错,请检查配置",e);
         }
 
     }
