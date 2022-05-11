@@ -152,34 +152,39 @@ public class QQEventHandlers extends SimpleListenerHost {
 
     private void processAutoFind(GroupMessageEvent event, String content) {
         List<String> pathList = scDataFinder.autoFind(content);
-        if (CollectionUtils.isEmpty(pathList)) return;
-        MessageChain message = MessageUtils.newChain();
         String version = "数据版本:"+scDataFinder.getCurrentVersion()+"\n";
-        message = message.plus(version+"小助手感觉您似乎在询问游戏内的商品购买位置\n");
-        final QuoteReply quote = new QuoteReply(event.getSource());
-        if (pathList.size() == 1){
-            message = message.plus("已为您匹配到了一条商品信息")
-                    .plus(new Face(Face.DE_YI)).plus("，详情如下：\n");
-            JsonProductVO productVO = scDataFinder.getProductInfo(pathList.get(0));
-            message = convertProduct(message, productVO);
+        MessageChain message = MessageUtils.newChain();
+        message = message.plus(version);
+        if (CollectionUtils.isEmpty(pathList)) {
+            message = message.plus("啥玩意儿都没找到，咱们玩的是一个游戏？");
         }else{
-            //找到的数量大于1条
-            message = message.plus("已为您匹配到"+pathList.size()+"条商品信息")
-                    .plus(new Face(Face.WU_YAN_XIAO).plus("\n")).plus("，名字最相近的商品详情如下：\n");
-            JsonProductVO productVO = null;
-            for (String path : pathList) {
+            message = message.plus(version+"小助手感觉您似乎在询问游戏内的商品购买位置\n");
+            final QuoteReply quote = new QuoteReply(event.getSource());
+            if (pathList.size() == 1){
+                message = message.plus("已为您匹配到了一条商品信息")
+                        .plus(new Face(Face.DE_YI)).plus("，详情如下：\n");
+                JsonProductVO productVO = scDataFinder.getProductInfo(pathList.get(0));
+                message = convertProduct(message, productVO);
+            }else{
+                //找到的数量大于1条
+                message = message.plus("已为您匹配到"+pathList.size()+"条商品信息")
+                        .plus(new Face(Face.WU_YAN_XIAO).plus("\n")).plus("，名字最相近的商品详情如下：\n");
+                JsonProductVO productVO = null;
+                for (String path : pathList) {
 
-                productVO = scDataFinder.getProductInfo(path);
-                if (CollectionUtils.isNotEmpty(productVO.getShopBuy())
-                        || CollectionUtils.isNotEmpty(productVO.getShopRent())
+                    productVO = scDataFinder.getProductInfo(path);
+                    if (CollectionUtils.isNotEmpty(productVO.getShopBuy())
+                            || CollectionUtils.isNotEmpty(productVO.getShopRent())
                             || CollectionUtils.isNotEmpty(productVO.getShopSell())){
-                    break;
+                        break;
+                    }
                 }
-            }
 
-            message = convertProduct(message, productVO);
-            message = message.plus("\n如果不正确，还请去https://wftank.cn/search查询");
+                message = convertProduct(message, productVO);
+                message = message.plus("\n如果不正确，还请去https://wftank.cn/search查询");
+            }
         }
+
         event.getGroup().sendMessage(quote
                 .plus(message));
     }
