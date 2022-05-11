@@ -159,7 +159,6 @@ public class QQEventHandlers extends SimpleListenerHost {
         if (CollectionUtils.isEmpty(pathList)) {
             message = message.plus("啥玩意儿都没找到，咱们玩的是一个游戏？");
         }else{
-            message = message.plus(version+"小助手感觉您似乎在询问游戏内的商品购买位置\n");
             if (pathList.size() == 1){
                 message = message.plus("已为您匹配到了一条商品信息")
                         .plus(new Face(Face.DE_YI)).plus("，详情如下：\n");
