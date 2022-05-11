@@ -70,7 +70,7 @@ public class SCDataFinder {
     /**
      * 一小时刷新一次
      */
-    @Scheduled(fixedDelay = 1000*60*60, initialDelay=1000*60*60)
+    @Scheduled(fixedDelay = 1000*60*60)
     public void load(){
         log.info("开始重载查询索引");
         long start = System.currentTimeMillis();
