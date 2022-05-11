@@ -139,6 +139,10 @@ public class SCDataFinder {
         return searchByEngine(keywordStr);
     }
 
+    public boolean isSearch(String content) {
+        return getKeywordByPattern(content) != null;
+    }
+
 
 
     private MatchIndexEntity match(String keywordStr, IndexEntity indexEntity) {

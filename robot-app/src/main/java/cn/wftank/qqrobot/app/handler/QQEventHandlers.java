@@ -156,7 +156,7 @@ public class QQEventHandlers extends SimpleListenerHost {
         String version = "数据版本:"+scDataFinder.getCurrentVersion()+"\n";
         MessageChain message = MessageUtils.newChain();
         message = message.plus(version);
-        if (CollectionUtils.isEmpty(pathList)) {
+        if (CollectionUtils.isEmpty(pathList) && scDataFinder.isSearch(content)) {
             message = message.plus("啥玩意儿都没找到，咱们玩的是一个游戏？");
         }else{
             if (pathList.size() == 1){
