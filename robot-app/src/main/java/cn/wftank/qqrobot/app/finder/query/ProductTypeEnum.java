@@ -14,19 +14,53 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 public enum ProductTypeEnum {
-    WEAPON_PERSONAL(1,"WeaponPersonal","FPS武器"),
-    WEAPON_ATTACHMENT(2,"WeaponAttachment","FPS武器配件"),
-    VEHICLE(3,"Vehicle","载具"),
-    SHIELD(4,"Shield","护盾"),
-    POWERPLANT(5,"PowerPlant","发电机"),
-    QUANTUMDRIVE(6,"QuantumDrive","量子引擎"),
-    GUN(7,"WeaponGun","机炮"),
-    MININGLASER(8,"MiningLaser","采矿激光"),
-    TURRET(9,"Turret","炮塔"),
-    COOLER(10,"Cooler","散热器"),
-    MISSILE(11,"Missile","导弹"),
-    PAINTS(12,"Paints","涂装"),
-    OTHER(13,"Other","其它"),
+
+
+
+    NOITEM_VEHICLE(1001,"NOITEM_Vehicle","载具(NOITEM_Vehicle)"),
+    SHIELD(1002,"Shield","护盾(Shield)"),
+    POWERPLANT(1003,"PowerPlant","发电机(PowerPlant)"),
+    QUANTUMDRIVE(1004,"QuantumDrive","量子引擎(QuantumDrive)"),
+    GUN(1005,"WeaponGun","舰炮(WeaponGun)"),
+    MININGLASER(1006,"MiningLaser","采矿激光(MiningLaser)"),
+    MININGMODIFIER(1007,"MiningModifier","采矿模组(MiningModifier)"),
+    TURRET(1008,"Turret","炮塔(Turret)"),
+    COOLER(1009,"Cooler","散热器(Cooler)"),
+    MISSILE(1010,"Missile","导弹(Missile)"),
+    PAINTS(1011,"Paints","涂装(Paints)"),
+    WEAPONDEFENSIVE(1012,"WeaponDefensive","防卫装置(WeaponDefensive)"),
+    MISSILELAUNCHER(1013,"MissileLauncher","导弹架(MissileLauncher)"),
+    BOMB(1014,"Bomb","炸弹(Bomb)"),
+
+    WEAPON_PERSONAL(2001,"WeaponPersonal","FPS武器(WeaponPersonal)"),
+    WEAPON_ATTACHMENT(2002,"WeaponAttachment","FPS武器配件(WeaponAttachment)"),
+    FPS_CONSUMABLE(2003,"FPS_Consumable","补给(FPS_Consumable)"),
+
+    CHAR_CLOTHING_TORSO_1(2101,"Char_Clothing_Torso_1","夹克(Char_Clothing_Torso_1)"),
+    CHAR_CLOTHING_TORSO_0(2102,"Char_Clothing_Torso_0","衬衫(Char_Clothing_Torso_0)"),
+    CHAR_CLOTHING_HAT(2103,"Char_Clothing_Hat","帽子(Char_Clothing_Hat)"),
+    CHAR_CLOTHING_FEET(2104,"Char_Clothing_Feet","鞋子(Char_Clothing_Feet)"),
+    CHAR_CLOTHING_HANDS(2105,"Char_Clothing_Hands","手套(Char_Clothing_Hands)"),
+    CHAR_CLOTHING_LEGS(2106,"Char_Clothing_Legs","裤子(Char_Clothing_Legs)"),
+
+    CHAR_ARMOR_UNDERSUIT(2201,"Char_Armor_Undersuit","基底服(Char_Armor_Undersuit)"),
+    CHAR_ARMOR_BACKPACK(2202,"Char_Armor_Backpack","背包(Char_Armor_Backpack)"),
+    CHAR_ARMOR_ARMS(2203,"Char_Armor_Arms","臂甲(Char_Armor_Arms)"),
+    CHAR_ARMOR_LEGS(2204,"Char_Armor_Legs","腿甲(Char_Armor_Legs)"),
+    CHAR_ARMOR_TORSO(2205,"Char_Armor_Torso","胸甲(Char_Armor_Torso)"),
+    CHAR_ARMOR_HELMET(2206,"Char_Armor_Helmet","头盔(Char_Armor_Helmet)"),
+
+
+
+
+    GADGET(3001,"Gadget","工具(Gadget)"),
+    CONTAINER(3002,"Container","货柜(Container)"),
+    FOOD(3003,"Food","食物(Food)"),
+    DRINK(3004,"Drink","饮料(Food)"),
+    MobiGlas(3005,"MobiGlas","智能穿戴设备(MobiGlas)"),
+    Misc(3006,"Misc","杂项(Misc)"),
+
+    OTHER(9999,"Other","其它"),
         ;
     private Integer index;
     private String name;
