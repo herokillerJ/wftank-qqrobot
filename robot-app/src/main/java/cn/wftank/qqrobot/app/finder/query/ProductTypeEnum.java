@@ -17,7 +17,7 @@ public enum ProductTypeEnum {
 
 
 
-    NOITEM_VEHICLE(1001,"NOITEM_Vehicle","载具(NOITEM_Vehicle)"),
+    NOITEM_VEHICLE(1001,"Vehicle","载具(Vehicle)"),
     SHIELD(1002,"Shield","护盾(Shield)"),
     POWERPLANT(1003,"PowerPlant","发电机(PowerPlant)"),
     QUANTUMDRIVE(1004,"QuantumDrive","量子引擎(QuantumDrive)"),
