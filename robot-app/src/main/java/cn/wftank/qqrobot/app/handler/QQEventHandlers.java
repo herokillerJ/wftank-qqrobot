@@ -131,7 +131,12 @@ public class QQEventHandlers extends SimpleListenerHost {
             }
             if (null != responseMsg){
                 //撤回用户发送的消息
-                MessageSource.recall(event.getSource());
+                try {
+                    MessageSource.recall(event.getSource());
+                }catch (Exception e){
+                    //助手可能因为不是群主或者管理员导致无法撤回其他人消息
+                    log.warn("无法撤回群:{} 成员:{} 发送的消息",event.getGroup().getId(), event.getSender().getId());
+                }
                 //撤回机器人上次发送的消息
                 if (null != qqMixQuerySession){
                     qqMixQuerySession.getLastMessageToRecall();
