@@ -40,6 +40,8 @@ public class QQEventHandlers extends SimpleListenerHost {
     private QQMixQueryManager qqMixQueryManager;
     @Autowired
     private WFtankSearcher wftankSearcher;
+    @Autowired
+    private CommonCommandHandler commonCommandHandler;
 
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception){
@@ -80,7 +82,10 @@ public class QQEventHandlers extends SimpleListenerHost {
         }else{
             if (content.equalsIgnoreCase("gj")){
                 processCreateMixQuery(event);
-            }else{
+            }else if(content.length() < 10 && commonCommandHandler.checkCommand(content)){
+                MessageChain singleMessages = commonCommandHandler.handleCommand(content, event);
+                event.getGroup().sendMessage(singleMessages);
+            } else{
                 //如果当前用户存在高级查询会话则走查询,否则走自动搜索
                 long qq = event.getSender().getId();
                 if (null != qqMixQueryManager.get(qq)){

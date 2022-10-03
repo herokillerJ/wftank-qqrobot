@@ -2,8 +2,10 @@ package cn.wftank.qqrobot.app.mirai;
 
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
+import cn.wftank.qqrobot.common.util.FileUtil;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.file.AbsoluteFile;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.utils.ExternalResource;
@@ -13,8 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +36,9 @@ public class QQGroupMessageSender {
         if (!bot.isOnline()){
             log.warn("bot is offline,will login again");
             bot.login();
+        }
+        if (messageChain.isEmpty()){
+            return;
         }
         //获取配置的QQ群
         String groupsStr = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
@@ -80,12 +88,24 @@ public class QQGroupMessageSender {
                             messageBuilder.add((String)message);
                         }else if (message instanceof File){
                             File file  = (File) message;
-                            messageBuilder.add(group.uploadImage(ExternalResource.create(file)));
+                            MimeType mimeType = FileUtil.detectFileMimeType(file);
+                            if (null == mimeType){
+                                messageBuilder.add(group.uploadImage(ExternalResource.create(file)));
+                            }else{
+                                if ("image".equals(mimeType.getType())){
+                                    messageBuilder.add(group.uploadImage(ExternalResource.create(file)));
+                                }else if ("text".equals(mimeType.getType())){
+                                    messageBuilder.add(Files.readString(file.toPath(), StandardCharsets.UTF_8));
+                                }else{
+                                    AbsoluteFile absoluteFile = group.getFiles().uploadNewFile(file.getAbsolutePath(), ExternalResource.create(file));
+                                    messageBuilder.add(absoluteFile.toMessage());
+                                }
+                            }
                         }
                     }
                 }
                 group.sendMessage(messageBuilder.build());
-                Thread.sleep(Duration.ofSeconds(5).toMillis());
+                Thread.sleep(Duration.ofSeconds(2).toMillis());
             } catch (Exception e) {
                 log.error("send message to group:{} exception:{}",groupId,ExceptionUtils.getStackTrace(e));
             }

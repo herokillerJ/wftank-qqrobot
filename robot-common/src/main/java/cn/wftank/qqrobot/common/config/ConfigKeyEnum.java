@@ -25,6 +25,7 @@ public enum ConfigKeyEnum{
         //搜索引擎
         INDEX_FILE_PATH("search.index.dir"),
         ANALYZER_CONFIG_PATH("search.analyzer.dir"),
+        COMMAND_DIR("command.dir"),
         ;
         private String key;
 
