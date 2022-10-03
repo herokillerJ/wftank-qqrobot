@@ -114,23 +114,29 @@ public class CommonCommandHandler {
     }
 
     public MessageChain handleCommand(String command, GroupMessageEvent event){
-        Path path = commandMap.get(command);
         MessageChainBuilder messageBuilder = new MessageChainBuilder();
-        try {
-            MimeType mimeType = FileUtil.detectFileMimeType(path);
-            if (null == mimeType){
-            }else{
-                if ("image".equals(mimeType.getType())){
-                    messageBuilder.add(event.getGroup().uploadImage(ExternalResource.create(path.toFile())));
-                }else if ("text".equals(mimeType.getType())){
-                    messageBuilder.add(Files.readString(path, StandardCharsets.UTF_8));
+        if ("指令列表".equals(command)){
+            messageBuilder.add("小助手支持以下指令，直接发送中文即可，不用带任何符号：\n");
+            messageBuilder.add(String.join("\n",commandMap.keySet()));
+            ;
+        }else{
+            Path path = commandMap.get(command);
+            try {
+                MimeType mimeType = FileUtil.detectFileMimeType(path);
+                if (null == mimeType){
                 }else{
-                    AbsoluteFile absoluteFile = event.getGroup().getFiles().uploadNewFile(path.toAbsolutePath().toString(), ExternalResource.create(path.toFile()));
-                    messageBuilder.add(absoluteFile.toMessage());
+                    if ("image".equals(mimeType.getType())){
+                        messageBuilder.add(event.getGroup().uploadImage(ExternalResource.create(path.toFile())));
+                    }else if ("text".equals(mimeType.getType())){
+                        messageBuilder.add(Files.readString(path, StandardCharsets.UTF_8));
+                    }else{
+                        AbsoluteFile absoluteFile = event.getGroup().getFiles().uploadNewFile(path.toAbsolutePath().toString(), ExternalResource.create(path.toFile()));
+                        messageBuilder.add(absoluteFile.toMessage());
+                    }
                 }
+            } catch (IOException e) {
+                log.error(ExceptionUtils.getStackTrace(e));
             }
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
         }
         return messageBuilder.build();
     }

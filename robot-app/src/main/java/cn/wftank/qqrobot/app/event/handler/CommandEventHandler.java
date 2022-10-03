@@ -40,22 +40,17 @@ public class CommandEventHandler implements EventHandler<CommandNotifyEvent> {
     }
 
     private void proccess(CommandNotifyEvent event) {
-        MessageChainBuilder builder = new MessageChainBuilder();
         switch (event.getType()){
             case CREATE:
                 commonCommandHandler.addCommand(event.getCommand(), event.getCommandPath());
-                builder.add(String.format("小助手添加了新的指令\"%s\"，快来试试吧",event.getCommand()));
                 break;
             case DELETE:
                 commonCommandHandler.removeCommand(event.getCommand());
-                builder.add(String.format("小助手删除了指令\"%s\"，不要在发送该指令啦",event.getCommand()));
                 break;
             case MODIFY:
                 commonCommandHandler.modifyCommand(event.getCommand(),event.getCommandPath());
-                builder.add(String.format("小助手修改了指令\"%s\"，快来试试有什么新变化吧!",event.getCommand()));
                 break;
         }
-        qqGroupSender.sendMessageForAllGroups(builder.build());
     }
 
 }
