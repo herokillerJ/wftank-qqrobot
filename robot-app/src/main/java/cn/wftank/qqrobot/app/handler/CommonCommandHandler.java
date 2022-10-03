@@ -118,6 +118,8 @@ public class CommonCommandHandler {
         if ("指令列表".equals(command)){
             messageBuilder.add("小助手支持以下指令，直接发送中文即可，不用带任何符号：\n");
             messageBuilder.add(String.join("\n",commandMap.keySet()));
+            messageBuilder.add("*在哪买(查询游戏内商品在哪买,如:\"短剑在哪买\")");
+            messageBuilder.add("gj(高级查询,可根据尺寸名称类型搜索商品名称)");
             ;
         }else{
             Path path = commandMap.get(command);
