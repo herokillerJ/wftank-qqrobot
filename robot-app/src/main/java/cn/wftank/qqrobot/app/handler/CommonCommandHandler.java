@@ -41,6 +41,7 @@ public class CommonCommandHandler {
 
     public CommonCommandHandler(NotifyEventPublisher notifyEventPublisher) {
         this.notifyEventPublisher = notifyEventPublisher;
+        initCommand();
     }
 
     private static final ThreadPoolExecutor DIR_MONITOR = new ScheduledThreadPoolExecutor(10,  new BasicThreadFactory.Builder().daemon(true)
@@ -49,8 +50,7 @@ public class CommonCommandHandler {
     private static final Map<String, Path> commandMap = new ConcurrentHashMap<>();
 
 
-    @PostConstruct
-    private void initCommand(){
+    public void initCommand(){
         String dir = GlobalConfig.getConfig(ConfigKeyEnum.COMMAND_DIR);
         File fileDir = new File(dir);
         if (!fileDir.exists()){
@@ -106,7 +106,7 @@ public class CommonCommandHandler {
 
     public boolean checkCommandFile(Path path){
         try {
-            return !Files.isDirectory(path) && !Files.isHidden(path);
+            return Files.exists(path) && !Files.isDirectory(path) && !Files.isHidden(path) && !path.getFileName().startsWith("~$");
         } catch (IOException e) {
             log.error(ExceptionUtils.getStackTrace(e));
         }
@@ -142,7 +142,7 @@ public class CommonCommandHandler {
     }
 
     public boolean checkCommand(String command){
-        return commandMap.containsKey(command);
+        return commandMap.containsKey(command) || command.equals("指令列表");
     }
 
     public void modifyCommand(String command, Path commandPath) {
