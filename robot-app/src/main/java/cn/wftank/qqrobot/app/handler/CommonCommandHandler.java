@@ -62,22 +62,29 @@ public class CommonCommandHandler {
         }
         File[] files = fileDir.listFiles();
         for (int i = 0; i < files.length; i++) {
-            if (files[i].isFile()){
+            if (checkCommandFile(files[i].toPath())){
                 String command = FilenameUtils.removeExtension(files[i].getName());
                 addCommand(command, files[i].toPath());
             }
         }
         try {
             WatchDir watchDir = new WatchDir(Paths.get(dir).toAbsolutePath().normalize(), false, (event, filePath) -> {
-                WatchEvent.Kind<Path> kind = event.kind();
-                String fileName = filePath.getFileName().toString();
-                String command = FilenameUtils.removeExtension(fileName);
-                if (StandardWatchEventKinds.ENTRY_CREATE.equals(kind)){
-                    notifyEventPublisher.publish(new CommandNotifyEvent(command,filePath, CommandEventType.CREATE));
-                }else if(StandardWatchEventKinds.ENTRY_DELETE.equals(kind)){
-                    notifyEventPublisher.publish(new CommandNotifyEvent(command,filePath, CommandEventType.DELETE));
-                }else if(StandardWatchEventKinds.ENTRY_MODIFY.equals(kind)){
-                    notifyEventPublisher.publish(new CommandNotifyEvent(command,filePath, CommandEventType.MODIFY));
+
+                try {
+                    if (checkCommandFile(filePath)){
+                        WatchEvent.Kind<Path> kind = event.kind();
+                        String fileName = filePath.getFileName().toString();
+                        String command = FilenameUtils.removeExtension(fileName);
+                        if (StandardWatchEventKinds.ENTRY_CREATE.equals(kind)){
+                            notifyEventPublisher.publish(new CommandNotifyEvent(command,filePath, CommandEventType.CREATE));
+                        }else if(StandardWatchEventKinds.ENTRY_DELETE.equals(kind)){
+                            notifyEventPublisher.publish(new CommandNotifyEvent(command,filePath, CommandEventType.DELETE));
+                        }else if(StandardWatchEventKinds.ENTRY_MODIFY.equals(kind)){
+                            notifyEventPublisher.publish(new CommandNotifyEvent(command,filePath, CommandEventType.MODIFY));
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error(ExceptionUtils.getStackTrace(e));
                 }
             }, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE);
             DIR_MONITOR.submit(() ->
@@ -95,6 +102,15 @@ public class CommonCommandHandler {
     public void removeCommand(String command){
         Path remove = commandMap.remove(command);
         log.info("删除指令:{} 路径:{}",command,remove);
+    }
+
+    public boolean checkCommandFile(Path path){
+        try {
+            return !Files.isDirectory(path) && !Files.isHidden(path);
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
+        return false;
     }
 
     public MessageChain handleCommand(String command, GroupMessageEvent event){
