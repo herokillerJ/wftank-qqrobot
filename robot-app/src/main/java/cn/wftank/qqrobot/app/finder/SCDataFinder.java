@@ -60,7 +60,7 @@ public class SCDataFinder {
     }
 
     public static final String DEFAULT_VERSION = "latest";
-    public static final String URL_PREFIX = "https://cdn.jsdelivr.net/gh/herokillerJ/starcitizen-data@";
+    public static final String URL_PREFIX = "https://raw.githubusercontent.com/herokillerJ/starcitizen-data/";
     private final LoadingCache<String, JsonProductVO> productCache = Caffeine.newBuilder()
             .maximumSize(100)
             .expireAfterWrite(5, TimeUnit.MINUTES)
