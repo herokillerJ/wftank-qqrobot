@@ -64,10 +64,6 @@ public class QQGroupMessageSender {
     }
 
     public void sendMessageForAllGroups(List messageList){
-        if (!bot.isOnline()){
-            log.warn("bot is offline,will login again");
-            bot.login();
-        }
         //获取配置的QQ群
         String groupsStr = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
         //使用有序set
@@ -76,7 +72,7 @@ public class QQGroupMessageSender {
             //每个群延时发送防止被当做机器人
             try {
                 MessageChainBuilder messageBuilder = new MessageChainBuilder();
-                Group group = bot.getGroup(groupId);
+                Group group = qQbotFactory.getBot().getGroup(groupId);
                 if (CollectionUtils.isNotEmpty(messageList)){
                     ListIterator iterator = messageList.listIterator();
                     while (iterator.hasNext()){
