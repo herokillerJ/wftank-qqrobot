@@ -25,12 +25,9 @@ public class QQbotFactory {
 
     private QQEventHandlers qqEventHandlers;
 
-    {
-        bot = getBot();
-    }
-
     public QQbotFactory(QQEventHandlers qqEventHandlers) {
         this.qqEventHandlers = qqEventHandlers;
+        bot = getBot();
     }
 
     private Bot createBot() {
