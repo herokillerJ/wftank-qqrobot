@@ -1,5 +1,6 @@
 package cn.wftank.qqrobot.app.mirai;
 
+import cn.wftank.qqrobot.app.config.QQbotFactory;
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.util.FileUtil;
@@ -28,15 +29,11 @@ import java.util.stream.Collectors;
 public class QQGroupMessageSender {
 
     @Autowired
-    private Bot bot;
+    private QQbotFactory qQbotFactory;
 
     private static final Logger log = LoggerFactory.getLogger(QQGroupMessageSender.class);
 
     public void sendMessageForAllGroups(MessageChain messageChain, List<File> imageList){
-        if (!bot.isOnline()){
-            log.warn("bot is offline,will login again");
-            bot.login();
-        }
         if (messageChain.isEmpty()){
             return;
         }
@@ -48,7 +45,7 @@ public class QQGroupMessageSender {
             //每个群延时发送防止被当做机器人
             try {
                 MessageChainBuilder messageBuilder = new MessageChainBuilder();
-                Group group = bot.getGroup(groupId);
+                Group group = qQbotFactory.getBot().getGroup(groupId);
                 messageBuilder.add(messageChain);
                 if (CollectionUtils.isNotEmpty(imageList)){
                     imageList.parallelStream().forEach(image -> messageBuilder.add(group.uploadImage(ExternalResource.create(image))));
