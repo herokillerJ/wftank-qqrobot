@@ -13,7 +13,7 @@
 
   <properties>
     <logj.version>2.13.1</logj.version>
-    <kotlin.version>1.5.30</kotlin.version>
+    <kotlin.version>1.5.10</kotlin.version>
   </properties>
 
   <dependencies>
@@ -52,42 +52,25 @@
     <dependency>
       <groupId>net.mamoe</groupId>
       <artifactId>mirai-core-jvm</artifactId>
-      <exclusions>
-        <!--dev版本在某些镜像仓库无法下载-->
-        <exclusion>
-          <groupId>net.mamoe</groupId>
-          <artifactId>kotlin-jvm-blocking-bridge-jvm</artifactId>
-        </exclusion>
-      </exclusions>
-      <version>2.8.0</version> <!-- 替换版本为你需要的版本 -->
+      <version>2.14.0</version> <!-- 替换版本为你需要的版本 -->
     </dependency>
     <dependency>
-      <groupId>net.mamoe</groupId>
-      <artifactId>kotlin-jvm-blocking-bridge-jvm</artifactId>
-      <version>1.10.6</version>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <version>${kotlin.version}</version>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.jetbrains.kotlin</groupId>-->
-<!--      <artifactId>kotlin-stdlib-jdk8</artifactId>-->
-<!--      <version>${kotlin.version}</version>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
       <artifactId>kotlinx-coroutines-core-jvm</artifactId>
-      <version>1.5.2</version>
+      <version>1.6.4</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
       <artifactId>kotlinx-coroutines-core</artifactId>
-      <version>1.5.2</version>
+      <version>1.6.4</version>
     </dependency>
 
-    <!--<dependency>
-      <groupId>net.mamoe</groupId>
-      <artifactId>mirai-login-solver-selenium</artifactId>
-      <version>1.0-dev-16</version>
-    </dependency>-->
-    <!--字符串近似度-->
     <dependency>
       <groupId>info.debatty</groupId>
       <artifactId>java-string-similarity</artifactId>
