@@ -15,14 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import us.codecraft.xsoup.XElements;
-import us.codecraft.xsoup.Xsoup;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -62,15 +61,14 @@ public class BaiduTiebaJob {
             List<TiebaThread> threads = new ArrayList<>();
             Document document = Jsoup.connect("https://tieba.baidu.com/home/main?un=%E7%81%AC%E7%81%ACG%E7%81%AC%E7%81%AC&ie=utf-8&id=tb.1.c71983a8._2RHIWDtaJALopgO4mFVeg")
                     .get();
-            XElements threadsEle = Xsoup.select(document.html(), "//div[@class='thread_name']");
-            Iterator<Element> iterator = threadsEle.getElements().iterator();
+            Iterator<Element> iterator = document.selectXpath("//div[@class='thread_name']").iterator();
             while (iterator.hasNext()){
                 Element element = iterator.next();
-                Element groupElement = Xsoup.select(element, "//a[@class='n_name']").getElements().get(0);
+                Element groupElement =element.selectXpath("//a[@class='n_name']").get(0);
                 String group = groupElement.attr("title");
                 //不是星际公民吧的不看
                 if (!"星际公民".equals(group)) continue;
-                Element titleElement = Xsoup.select(element, "//a[@class='title']").getElements().get(0);
+                Element titleElement =element.selectXpath( "//a[@class='title']").get(0);
                 String title = titleElement.attr("title");
                 String path = titleElement.attr("href");
                 path = "https://tieba.baidu.com/"+path.substring(0,path.indexOf("?"));
@@ -89,6 +87,7 @@ public class BaiduTiebaJob {
                 log.info("g-lao newestPid:"+newestPid);
                 //xpath选择有时会出问题导致所有选择器都是空,这里做下过滤
                 if (StringUtils.isBlank(newestPid)) return;
+                //ruguo
                 if (first){
                     TiebaThread tiebaThread = threads.get(0);
                     newThreads.add(tiebaThread);
@@ -96,17 +95,15 @@ public class BaiduTiebaJob {
                     if (newestPid.equals(latestPid)){
                         return;
                     }
+                    //这里改为只取第一个,防止刷屏
                     for (TiebaThread thread : threads) {
-                        if (thread.getPid().equals(latestPid)){
-                            break;
-                        }else{
-                            if (StringUtils.isNotBlank(newestPid)){
-                                newThreads.add(thread);
-                            }
+                        if (!thread.getPid().equals(latestPid)){
+                            newThreads.add(thread);
                         }
+                        break;
                     }
                 }
-                Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8));
+                Files.write(file.toPath(),newestPid.getBytes(StandardCharsets.UTF_8), StandardOpenOption.SYNC);
                 if (!newThreads.isEmpty()){
                     TiebaNotifyEvent event = new TiebaNotifyEvent();
                     event.setNewThreads(newThreads);

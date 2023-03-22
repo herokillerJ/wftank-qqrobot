@@ -1,25 +1,28 @@
 package cn.wftank.qqrobot.app.handler;
 
-import cn.wftank.qqrobot.app.finder.IndexEntity;
-import cn.wftank.qqrobot.app.finder.MatchIndexEntity;
 import cn.wftank.qqrobot.app.finder.SCDataFinder;
+import cn.wftank.qqrobot.app.finder.query.QQMixQueryManager;
+import cn.wftank.qqrobot.app.finder.query.QQMixQuerySession;
+import cn.wftank.qqrobot.app.finder.query.QueryConditionTypeEnum;
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.app.model.vo.ProductRentShopVO;
 import cn.wftank.qqrobot.app.model.vo.ProductShopVO;
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
+import cn.wftank.search.WFtankSearcher;
 import kotlin.coroutines.CoroutineContext;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -33,6 +36,12 @@ public class QQEventHandlers extends SimpleListenerHost {
     private static final Logger log = LoggerFactory.getLogger(QQEventHandlers.class);
     @Autowired
     private SCDataFinder scDataFinder;
+    @Autowired
+    private QQMixQueryManager qqMixQueryManager;
+    @Autowired
+    private WFtankSearcher wftankSearcher;
+    @Autowired
+    private CommonCommandHandler commonCommandHandler;
 
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception){
@@ -71,30 +80,120 @@ public class QQEventHandlers extends SimpleListenerHost {
         if (isAtBot){
             processCommand(event, content);
         }else{
-            //通过正则确定是否在问商品信息
-            processAutoFind(event, content);
+            if (content.equalsIgnoreCase("gj")){
+                processCreateMixQuery(event);
+            }else if(content.length() < 10 && commonCommandHandler.checkCommand(content)){
+                MessageChain singleMessages = commonCommandHandler.handleCommand(content, event);
+                event.getGroup().sendMessage(singleMessages);
+            } else{
+                //如果当前用户存在高级查询会话则走查询,否则走自动搜索
+                long qq = event.getSender().getId();
+                if (null != qqMixQueryManager.get(qq)){
+                    processMixQuery(event, content);
+                }else{
+                    //通过正则确定是否在问商品信息
+                    processAutoFind(event, content);
+                }
+            }
         }
     }
 
-    private void processAutoFind(GroupMessageEvent event, String content) {
-        List<MatchIndexEntity> matchIndexList = scDataFinder.autoFind(content);
-        if (CollectionUtils.isEmpty(matchIndexList)) return;
-        MessageChain message = MessageUtils.newChain();
-        message = message.plus("小助手感觉您似乎在询问游戏内的商品购买位置\n");
-        final QuoteReply quote = new QuoteReply(event.getSource());
-        if (matchIndexList.size() == 1){
-            message = message.plus("已为您匹配到了一条商品信息")
-                    .plus(new Face(Face.DE_YI)).plus("，详情如下：\n");
-            JsonProductVO productVO = scDataFinder.getProductInfo(matchIndexList.get(0).getPath());
-            message = convertProduct(message, productVO);
-        }else{
-            //找到的数量大于1条
-            message = message.plus("已为您匹配到"+matchIndexList.size()+"条商品信息")
-                    .plus(new Face(Face.WU_YAN_XIAO).plus("\n")).plus("，名字最相近的商品详情如下：\n");
-            JsonProductVO productVO = scDataFinder.getProductInfo(matchIndexList.get(0).getPath());
-            message = convertProduct(message, productVO);
-            message = message.plus("\n如果不正确，还请去https://wftank.cn/search查询");
+    private void processMixQuery(GroupMessageEvent event, String content) {
+        long qq = event.getSender().getId();
+        QQMixQuerySession qqMixQuerySession = null;
+        if (StringUtils.isNotBlank(content)){
+            Message responseMsg = null;
+            content = StringUtils.trim(content);
+            qqMixQuerySession = qqMixQueryManager.get(qq);
+            boolean stopMsgRecallFlag = false;
+            QuoteReply quote = new QuoteReply(event.getSource());
+            if (QQMixQuerySession.STOP_FLAG.equals(content)){
+                //结果也要撤回
+                stopMsgRecallFlag = true;
+                //结束查询
+                List<String> result = null;
+                try {
+                    result = qqMixQuerySession.doQuery();
+                }finally {
+                    qqMixQueryManager.remove(qq);
+                }
+                if (CollectionUtils.isEmpty(result)){
+                    responseMsg = quote.plus("未查询到任何商品");
+                }else{
+                    String version = "数据版本:"+scDataFinder.getCurrentVersion()+"\n";
+                    StringBuilder sb = new StringBuilder(version+"小助手已为您查询到以下商品：\n");
+                    for (String eachMsg :  result) {
+                        sb.append("\n"+eachMsg);
+                    }
+                    responseMsg = quote.plus(sb.toString());
+                }
+            }else{
+                //非结束查询,说明是添加条件或者添加值
+                MessageChain messageChain = qqMixQuerySession.addQueryCondition(event, content);
+                if (null != messageChain){
+                    responseMsg = quote.plus(messageChain);
+                }
+            }
+            if (null != responseMsg){
+                //撤回用户发送的消息
+                try {
+                    MessageSource.recall(event.getSource());
+                }catch (Exception e){
+                    //助手可能因为不是群主或者管理员导致无法撤回其他人消息
+                    log.warn("无法撤回群:{} 成员:{} 发送的消息",event.getGroup().getId(), event.getSender().getId());
+                }
+                //撤回机器人上次发送的消息
+                if (null != qqMixQuerySession){
+                    qqMixQuerySession.getLastMessageToRecall();
+                    MessageReceipt lastMsg = qqMixQuerySession.getLastMessageToRecall().get();
+                    if (null != lastMsg){
+                        MessageSource.recallIn(lastMsg.getSource(),1000);
+                    }
+                }
+                MessageReceipt messageReceipt = event.getGroup().sendMessage(responseMsg);
+                qqMixQuerySession.getLastMessageToRecall().set(messageReceipt);
+                if (stopMsgRecallFlag){
+                    MessageSource.recallIn(messageReceipt.getSource(),1000*30);
+                }
+            }
         }
+
+    }
+
+    private void processAutoFind(GroupMessageEvent event, String content) {
+        List<String> pathList = scDataFinder.autoFind(content);
+        final QuoteReply quote = new QuoteReply(event.getSource());
+        String version = "数据版本:"+scDataFinder.getCurrentVersion()+"\n";
+        MessageChain message = MessageUtils.newChain();
+        message = message.plus(version);
+        if (CollectionUtils.isEmpty(pathList) && scDataFinder.isSearch(content)) {
+            message = message.plus("啥玩意儿都没找到，咱们玩的是一个游戏？");
+        }else{
+            if (pathList.size() == 1){
+                message = message.plus("已为您匹配到了一条商品信息")
+                        .plus(new Face(Face.DE_YI)).plus("，详情如下：\n");
+                JsonProductVO productVO = scDataFinder.getProductInfo(pathList.get(0));
+                message = convertProduct(message, productVO);
+            }else{
+                //找到的数量大于1条
+                message = message.plus("已为您匹配到"+pathList.size()+"条商品信息")
+                        .plus(new Face(Face.WU_YAN_XIAO).plus("\n")).plus("，名字最相近的商品详情如下：\n");
+                JsonProductVO productVO = null;
+                for (String path : pathList) {
+
+                    productVO = scDataFinder.getProductInfo(path);
+                    if (CollectionUtils.isNotEmpty(productVO.getShopBuy())
+                            || CollectionUtils.isNotEmpty(productVO.getShopRent())
+                            || CollectionUtils.isNotEmpty(productVO.getShopSell())){
+                        break;
+                    }
+                }
+
+                message = convertProduct(message, productVO);
+                message = message.plus("\n如果不正确，还请去https://wftank.cn/search查询");
+            }
+        }
+
         event.getGroup().sendMessage(quote
                 .plus(message));
     }
@@ -110,7 +209,7 @@ public class QQEventHandlers extends SimpleListenerHost {
             while (iterator.hasNext()) {
                 ProductShopVO next = iterator.next();
                 if (next.getLayoutName().toLowerCase().contains("cryastro")) continue;
-                message = message.plus(next.getLayoutNameCn() + "\t" + new BigDecimal(next.getCurrentPrice()).toPlainString() + "\n");
+                message = message.plus(next.getLayoutNameCn() + "\t价格：" + new BigDecimal(next.getCurrentPrice()).toPlainString() + " auec\n");
             }
         }
         if (productVO.getCanRent()) {
@@ -120,98 +219,57 @@ public class QQEventHandlers extends SimpleListenerHost {
             while (iterator.hasNext()) {
                 ProductRentShopVO next = iterator.next();
                 if (next.getLayoutName().toLowerCase().contains("cryastro")) continue;
-                message = message.plus(next.getLayoutNameCn() + "\n")
-                        .plus("租一天：" + next.getRentPrice1() + "\n")
-                        .plus("租三天：" + next.getRentPrice3() + "\n")
-                        .plus("租七天：" + next.getRentPrice7() + "\n")
-                        .plus("租三十天：" + next.getRentPrice30() + "\n");
+                message = message.plus(next.getLayoutNameCn() + " auec\n")
+                        .plus("租一天：" + next.getRentPrice1() + " auec\n")
+                        .plus("租三天：" + next.getRentPrice3() + " auec\n")
+                        .plus("租七天：" + next.getRentPrice7() + " auec\n")
+                        .plus("租三十天：" + next.getRentPrice30() + " auec\n");
             }
         }
         return message;
     }
 
     private void processCommand(@NotNull GroupMessageEvent event, String content) {
-        boolean isCommand = false;
-        if (content.startsWith("-")){
-            isCommand = true;
-        }
-        if (isCommand){
+        content = StringUtils.trim(content);
+        if (StringUtils.isNotBlank(content)){
             int firstSpaceIndex = content.indexOf(" ");
             String commandKey;
-            String commandContent;
             if (firstSpaceIndex < 0){
-                commandKey = content.substring(1);
-                commandContent = "";
+                commandKey = content;
             }else{
-                commandKey = content.substring(1,firstSpaceIndex);
-                commandContent = content.substring(firstSpaceIndex+1);
+                commandKey = content.substring(0,firstSpaceIndex);
             }
-            if ("s".equalsIgnoreCase(commandKey)){
-                searchCommandProccess(event,commandContent);
-            }else if ("help".equalsIgnoreCase(commandKey)){
-                final QuoteReply quote = new QuoteReply(event.getSource());
+            if ("高级查询".equalsIgnoreCase(commandKey)){
+                processCreateMixQuery(event);
+            }else if ("帮助".equalsIgnoreCase(commandKey)){
+                QuoteReply quote = new QuoteReply(event.getSource());
                 event.getGroup().sendMessage(quote
-                        .plus("小助手仅支持以下指令哦~\n")
-                        .plus("-s 查找物品 模糊匹配: -s 小矿 精确匹配: /s {小矿}\n"));
-            }else{
-                final QuoteReply quote = new QuoteReply(event.getSource());
-                event.getGroup().sendMessage(quote
-                        .plus("请使用-help查看小助手支持的指令"));
+                        .plus("普通查询：不用@小助手，直接发：\"xxx在哪买\"即可搜索商品,例：\n")
+                        .plus("水星在哪买\n"));
+            }else if ("gj".equalsIgnoreCase(commandKey)){
+                processCreateMixQuery(event);
             }
         }else{
             final QuoteReply quote = new QuoteReply(event.getSource());
             event.getGroup().sendMessage(quote
-                    .plus("请使用-help查看小助手支持的指令"));
+                    .plus("请@小助手并输入\"帮助\"来查看小助手的使用方式"));
         }
     }
 
-    /**
-     * 搜索指令处理
-     * @param event
-     * @param commandContent
-     */
-    private void searchCommandProccess(GroupMessageEvent event,String commandContent) {
-        int limit = 5;
-        List<IndexEntity> search = scDataFinder.search(commandContent);
-        //引用回复
-        final QuoteReply quote = new QuoteReply(event.getSource());
-        MessageChain message = MessageUtils.newChain();
-        if (search.size() < 1){
-            message = message.plus("抱歉,小助手没找到你描述的商品")
-                    .plus(new Face(Face.YUN));
-        }else if(search.size() == 1){
-            JsonProductVO productVO = scDataFinder.getProductInfo(search.get(0).getPath());
-            if (productVO.getCommodity()){
-                message = message.plus("机器人暂不支持查询贸易品,请去下面提示的网站查询：\n");
-            }else{
-                //确定了唯一商品
-                message = message.plus("找到商品了，详情如下：")
-                        .plus(new Face(Face.DE_YI).plus("\n"));
-                message = convertProduct(message, productVO);
-            }
-
-        }else if (search.size() > limit){
-            //商品数量多于5条
-            message = message.plus("麻烦您说的精确一点,我找到了"+search.size()+"件商品,只能显示前"+limit+"条哦，只有查找到一条信息的时候我才会显示详情。")
-                    .plus("或者用花括号包裹关键字采用精确匹配,例如{"+commandContent+"}\n")
-                    .plus(new Face(Face.QIU_DA_LE).plus("\n"));
-            for (int i = 0; i < limit; i++) {
-                IndexEntity indexEntity = search.get(i);
-                message = message.plus(""+(i+1)+"：")
-                        .plus(indexEntity.getNameCn())
-                        .plus("["+indexEntity.getName()+"]\n");
-            }
-        }else{
-            //商品数量在2-5条之间
-            message = message.plus("小助手已为你找到以下"+search.size()+"件商品,请复制其中一个的完整名称给我：\n")
-                    .plus("或者用花括号包裹关键字采用精确匹配,例如{"+commandContent+"}\n");
-            for (int i = 0; i < search.size(); i++) {
-                IndexEntity indexEntity = search.get(i);
-                message = message.plus(""+(i+1)+"："+indexEntity.getNameCn()+"["+indexEntity.getName()+"]\n");
-            }
-
+    private void processCreateMixQuery(GroupMessageEvent event) {
+        long qq = event.getSender().getId();
+        QQMixQuerySession qqMixQuerySession = new QQMixQuerySession(qq, wftankSearcher);
+        qqMixQueryManager.put(qq,qqMixQuerySession);
+        QuoteReply quoteReply = new QuoteReply(event.getSource());
+        String createMixMsg = "您已创建高级查询，请选择如下查询条件，发送他们的编号即可，无需回复本条消息";
+        QueryConditionTypeEnum[] values = QueryConditionTypeEnum.values();
+        for (int i = 0; i < values.length; i++) {
+            QueryConditionTypeEnum conditionType = values[i];
+            createMixMsg += "\n"+conditionType.getIndex()+"："+conditionType.getName();
         }
-        event.getGroup().sendMessage(quote.plus(message.plus("\n https://wftank.cn/search可获取更多信息")));
+        createMixMsg+="\n在查询期间，您发送的消息均会被撤回，如需取消查询，请发送"+QQMixQuerySession.STOP_FLAG;
+        MessageReceipt messageReceipt = event.getGroup().sendMessage(quoteReply.plus(createMixMsg));
+        qqMixQuerySession.getLastMessageToRecall().set(messageReceipt);
     }
 
 //    @NotNull

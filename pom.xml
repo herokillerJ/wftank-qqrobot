@@ -9,6 +9,7 @@
         <module>robot-common</module>
         <module>robot-dao</module>
         <module>robot-discord</module>
+        <module>robot-search-engine</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -55,12 +56,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--队列-->
-        <dependency>
-            <groupId>com.lmax</groupId>
-            <artifactId>disruptor</artifactId>
-            <version>3.4.2</version>
-        </dependency>
         <!--lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -72,6 +67,10 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-core</artifactId>
         </dependency>
         <!--日志-->
         <dependency>

@@ -3,28 +3,38 @@ package cn.wftank.qqrobot.app.finder;
 import cn.wftank.qqrobot.app.model.vo.JsonProductVO;
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
+import cn.wftank.qqrobot.common.util.JsonUtil;
 import cn.wftank.qqrobot.common.util.OKHttpUtil;
 import cn.wftank.qqrobot.common.util.StringUtils;
+import cn.wftank.search.WFtankSearcher;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import info.debatty.java.stringsimilarity.MetricLCS;
 import info.debatty.java.stringsimilarity.interfaces.StringDistance;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.TermQuery;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+
 public class SCDataFinder {
 
     private List<IndexEntity> indexList = new CopyOnWriteArrayList<>();
@@ -33,60 +43,71 @@ public class SCDataFinder {
     //字符串匹配算法
     private StringDistance similarMatcher = new MetricLCS();
 
-    {
-        patternMap.put(Pattern.compile("(.+)(在|去|到)*.*(哪|那)+.*(买|卖|租)+.*"),1);
-        load();
+    private WFtankSearcher wFtankSearcher;
+
+    private AtomicReference<String> currentVersion = new AtomicReference<>();
+
+    public SCDataFinder(@Autowired WFtankSearcher wFtankSearcher) {
+        this.wFtankSearcher = wFtankSearcher;
     }
 
-    private static final String DEFAULT_VERSION = "latest";
-    private static final String URL_PREFIX = "https://cdn.jsdelivr.net/gh/herokillerJ/starcitizen-data@";
+    {
+        patternMap.put(Pattern.compile("(.+)(在|去|到)+.*(哪|那)+.*(买|卖|租)+.*"),1);
+    }
+
+    public String getCurrentVersion() {
+        return currentVersion.get();
+    }
+
+    public static final String DEFAULT_VERSION = "latest";
+    public static final String URL_PREFIX = "https://raw.githubusercontent.com/herokillerJ/starcitizen-data/";
     private final LoadingCache<String, JsonProductVO> productCache = Caffeine.newBuilder()
             .maximumSize(100)
             .expireAfterWrite(5, TimeUnit.MINUTES)
             .refreshAfterWrite(1, TimeUnit.MINUTES)
             .build(path -> loadProductInfo(path));
 
+    /**
+     * 一小时刷新一次
+     */
     @Scheduled(fixedDelay = 1000*60*60)
-    private void load(){
+    public void load(){
+        log.info("开始重载查询索引");
+        long start = System.currentTimeMillis();
         String indexUrl = URL_PREFIX+ GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION) +"/index.json";
         String extIndexUrl = URL_PREFIX+GlobalConfig.getConfig(ConfigKeyEnum.SC_DB_VERSION)+"/ext_index.json";
         Index index = OKHttpUtil.get(indexUrl, new TypeReference<Index>() {});
+        currentVersion.getAndSet(index.getVersion());
         List<IndexEntity> mainList = index.getIndex();
         Index extIndex = OKHttpUtil.get(extIndexUrl, new TypeReference<Index>() {});
         mainList.addAll(extIndex.getIndex());
-        mainList = mainList.parallelStream().map(indexEntity -> {
-            indexEntity.setName(indexEntity.getName().replaceAll("\\s+", " "));
-            indexEntity.setNameCn(indexEntity.getNameCn().replaceAll("\\s+", " "));
-            return indexEntity;
-        }).collect(Collectors.toList());
-        indexList.clear();
-        indexList.addAll(mainList);
+        List<String> indesJsonList = mainList.stream().map(JsonUtil::toJson).collect(Collectors.toList());
+        wFtankSearcher.reloadIndexFromString(indesJsonList);
+        long end = System.currentTimeMillis();
+        log.info("重载索引完成,版本:{}，耗时：{}秒",getCurrentVersion(),(end-start)/1000);
     }
 
-    public List<IndexEntity> search(String keyword){
-        List<IndexEntity> result;
-        boolean exact = false;
-        if (keyword.startsWith("{") && keyword.endsWith("}")){
-            exact = true;
-            keyword = keyword.substring(1,keyword.length()-1);
-        }
-        boolean finalExact = exact;
-        String finalKeyword = keyword;
-        result = indexList.parallelStream().filter(indexEntity -> {
-            if (finalExact){
-                //精确匹配
-                return indexEntity.getName().equalsIgnoreCase(finalKeyword.toLowerCase())
-                        || indexEntity.getNameCn().equals(finalKeyword);
-            }else{
-                //模糊匹配
-                return StringUtils.longestCommonSubstring(StringUtils.replaceAllMarks(indexEntity.getName()).toLowerCase(),StringUtils.replaceAllMarks(finalKeyword).toLowerCase()).length() > 0
-                        || StringUtils.longestCommonSubstring(StringUtils.replaceAllMarks(indexEntity.getNameCn()).toLowerCase(),StringUtils.replaceAllMarks(finalKeyword).toLowerCase()).length() > 0;
+    public List<String> search(String keyword){
+        return searchByEngine(keyword);
+    }
+
+    public List<String> searchByEngine(String keyword){
+        List result = new LinkedList();
+        List<String> keywords = wFtankSearcher.analizeString(keyword);
+        if (CollectionUtils.isNotEmpty(keywords)){
+            BooleanQuery.Builder builder = new BooleanQuery.Builder();
+            keywords.forEach(str -> {
+                builder
+                        .add(new TermQuery(new Term("name", str)), BooleanClause.Occur.SHOULD)
+                        .add(new TermQuery(new Term("name_cn", str)),BooleanClause.Occur.SHOULD);
+            });
+            BooleanQuery query = builder.build();
+            List<Document> docList = wFtankSearcher.search(query, 10);
+            if (CollectionUtils.isNotEmpty(docList)){
+                result.addAll(docList.stream().map(doc -> doc.getField("path").stringValue()).collect(Collectors.toList()));
             }
-        }).sorted((i1,i2) -> {
-            MatchIndexEntity match1 = match(finalKeyword, i1);
-            MatchIndexEntity match2 = match(finalKeyword, i2);
-            return sort(match1, match2);
-        }).collect(Collectors.toList());
+        }
+        log.info("搜索:{} 结果为:{}",keyword,result);
         return result;
     }
 
@@ -112,32 +133,14 @@ public class SCDataFinder {
      * //通过正则确定是否在问商品信息
      * @param content
      */
-    public List<MatchIndexEntity> autoFind(String content) {
+    public List<String> autoFind(String content) {
         String keywordStr = getKeywordByPattern(content);
         if (keywordStr == null) return null;
-        List<MatchIndexEntity> matchList = indexList.parallelStream()
-                .filter(matchIndexEntity ->
-                    //中文或者英文至少应该有一个相同字符
-                    StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getNameCn()).length() > 0
-                    || StringUtils.longestCommonSubstring(keywordStr,matchIndexEntity.getName()).length() > 0)
-                .map(indexEntity -> {
-                    /**
-                     * MetricLCS 匹配字符串
-                     */
-                    MatchIndexEntity matchIndexEntity = match(keywordStr, indexEntity);
-                    return matchIndexEntity;
-                }).sorted((match1, match2) -> {
-                            //分数小的在前面(分数越低,目标字符串转换到原字符串步骤越少)
-                            return sort(match1, match2);
-                }).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(matchList)){
-            //做多取前5个
-            if (matchList.size() > 5){
-                return matchList.subList(0,4);
-            }
-            return matchList;
-        }
-        return new LinkedList<>();
+        return searchByEngine(keywordStr);
+    }
+
+    public boolean isSearch(String content) {
+        return getKeywordByPattern(content) != null;
     }
 
 

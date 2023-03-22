@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,14 +130,13 @@ public class SpectrumJob {
                     return;
                 }
                 for (ThreadsItem thread : resp.getRespData().getThreads()) {
-                    if (thread.getId().equals(latestId)){
-                        break;
-                    }else{
+                    if (!thread.getId().equals(latestId)){
                         newThreads.add(SpectrumThreadConvertor.convert(thread));
                     }
+                    break;
                 }
             }
-            Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8));
+            Files.write(file.toPath(),newestId.getBytes(StandardCharsets.UTF_8), StandardOpenOption.SYNC);
             if (!newThreads.isEmpty()){
                 SpectrumNotifyEvent event = new SpectrumNotifyEvent();
                 event.setNewThreads(newThreads);

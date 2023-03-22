@@ -21,7 +21,11 @@ public enum ConfigKeyEnum{
         TRANSLATE_BAIDU_APPID("translate.baidu.appid"),
         TRANSLATE_BAIDU_SECRET("translate.baidu.secret"),
         //discord,
-        DISCORD_CHANNEL_IDS("discord.channel.ids")
+        DISCORD_CHANNEL_IDS("discord.channel.ids"),
+        //搜索引擎
+        INDEX_FILE_PATH("search.index.dir"),
+        ANALYZER_CONFIG_PATH("search.analyzer.dir"),
+        COMMAND_DIR("command.dir"),
         ;
         private String key;
 

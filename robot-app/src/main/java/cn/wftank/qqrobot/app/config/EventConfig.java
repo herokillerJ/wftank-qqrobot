@@ -49,7 +49,6 @@ public class EventConfig {
         ThreadFactory threadFactory = new BasicThreadFactory.Builder().daemon(true).namingPattern("notify-event-disruptor").build();
         Disruptor<NotifyEventWrapper> disruptor = new Disruptor(factory, 1024, threadFactory,ProducerType.SINGLE, new BlockingWaitStrategy());
         disruptor.handleEventsWith(notityEventHandler);
-
         // Start the Disruptor, starts all threads running
         disruptor.start();
 
