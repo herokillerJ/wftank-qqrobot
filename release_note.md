@@ -1,11 +1,5 @@
-v1.0.2
-注意：请务必删除jar包同目录下的qq-robot文件夹并将config.properties中的属性设置为mirai.protocol=MACOS
+v1.0.3
+注意：请务必删除jar包同目录下的qqbot文件夹并将config.properties中的属性设置为mirai.protocol=ANDROID_PHONE
 1. 升级mirai版本到2.14.0。
-2. 解决部分依赖冲突
-3. 取消issueCouncil拉取
-4. 同种类型消息（G佬帖子、官网公告）始终只会发送一条最新消息,防止刷屏
-5. 修复未同步刷盘导致的版本判断出错
-6. 修复当比机器人权限高的成员使用高级查询时卡住的问题
-7. 增加高级搜索类型
-8. 修复部分事件消息丢失问题
-9. 增加自定义添加文件指令功能
+2. 升级fix-protocol-version版本到1.15.1解决无法登陆问题。
+
