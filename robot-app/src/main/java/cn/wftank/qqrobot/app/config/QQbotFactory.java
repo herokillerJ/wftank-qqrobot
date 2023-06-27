@@ -6,6 +6,7 @@ import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.util.StringUtils;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
+import net.mamoe.mirai.auth.BotAuthorization;
 import net.mamoe.mirai.event.events.GroupEvent;
 import net.mamoe.mirai.utils.BotConfiguration;
 import net.mamoe.mirai.utils.LoggerAdapters;
@@ -40,22 +41,22 @@ public class QQbotFactory {
         protocol = protocol == null ? BotConfiguration.MiraiProtocol.ANDROID_PHONE : protocol;
 
         BotConfiguration.MiraiProtocol finalProtocol = protocol;
-        Bot bot = BotFactory.INSTANCE.newBot(Long.valueOf(GlobalConfig.getConfig(ConfigKeyEnum.QQ)),
-                GlobalConfig.getConfig(ConfigKeyEnum.PASSWORD), new BotConfiguration() {{
-                    fileBasedDeviceInfo(); // 使用 device.json 存储设备信息
-                    setProtocol(finalProtocol); // 切换协议
-                    File workDir = new File("./qqbot");
-                    if (!workDir.exists()) {
-                        try {
-                            Files.createDirectories(workDir.toPath());
-                        } catch (IOException e) {
-                            log.error(ExceptionUtils.getStackTrace(e));
-                        }
-                    }
-                    setWorkingDir(workDir);
-                    setNetworkLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
-                    setBotLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
-                }});
+        Bot bot = BotFactory.INSTANCE.newBot(Long.valueOf(GlobalConfig.getConfig(ConfigKeyEnum.QQ)), BotAuthorization.byQRCode(), new BotConfiguration() {{
+            fileBasedDeviceInfo(); // 使用 device.json 存储设备信息
+            setProtocol(finalProtocol); // 切换协议
+            File workDir = new File("./qqbot");
+            if (!workDir.exists()) {
+                try {
+                    Files.createDirectories(workDir.toPath());
+                } catch (IOException e) {
+                    log.error(ExceptionUtils.getStackTrace(e));
+                }
+            }
+            setWorkingDir(workDir);
+            setNetworkLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
+            setBotLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger(this.getClass())));
+        }});
+
         bot.getEventChannel()
                 .filter(ev -> ev instanceof GroupEvent)
                 .registerListenerHost(qqEventHandlers);

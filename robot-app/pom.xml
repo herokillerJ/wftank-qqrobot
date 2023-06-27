@@ -52,7 +52,7 @@
     <dependency>
       <groupId>net.mamoe</groupId>
       <artifactId>mirai-core-jvm</artifactId>
-      <version>2.14.0</version> <!-- 替换版本为你需要的版本 -->
+      <version>2.15.0-RC</version> <!-- 替换版本为你需要的版本 -->
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
@@ -67,9 +67,9 @@
     <dependency>
       <groupId>xyz.cssxsh.mirai.tool</groupId>
       <artifactId>fix-protocal-version</artifactId>
-      <version>1.5.1</version>
+      <version>1.8.4</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/src/lib/fix-protocol-version-1.5.1.mirai2.jar</systemPath>
+      <systemPath>${project.basedir}/src/lib/fix-protocol-version-1.8.4.mirai2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>

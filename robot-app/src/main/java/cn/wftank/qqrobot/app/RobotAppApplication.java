@@ -23,7 +23,6 @@ public class RobotAppApplication {
 
     public static void main(String[] args) throws FileNotFoundException {
         GlobalConfig.checkConfig();
-        FixProtocolVersion.update();
         logger.info(JsonUtil.toJson(FixProtocolVersion.info()));
         SpringApplication.run(RobotAppApplication.class, args);
     }
