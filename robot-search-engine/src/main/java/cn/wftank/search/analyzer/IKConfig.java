@@ -1,5 +1,6 @@
 package cn.wftank.search.analyzer;
 
+import cn.wftank.qqrobot.common.config.GlobalConfig;
 import org.wltea.analyzer.cfg.Configuration;
 
 import java.io.FileInputStream;
@@ -28,7 +29,7 @@ public class IKConfig implements Configuration {
     // 配置属性——扩展停止词典
     private static final String EXT_STOP = "ext_stopwords";
 
-    private Properties props;
+    private final Properties props;
     /*
      * 是否使用smart方式分词
      */
@@ -105,7 +106,7 @@ public class IKConfig implements Configuration {
             if (filePaths != null) {
                 for (String filePath : filePaths) {
                     if (filePath != null && !"".equals(filePath.trim())) {
-                        extDictFiles.add(filePath.trim());
+                        extDictFiles.add(GlobalConfig.getWorkDir() + filePath.trim());
                     }
                 }
             }
@@ -127,7 +128,7 @@ public class IKConfig implements Configuration {
             if (filePaths != null) {
                 for (String filePath : filePaths) {
                     if (filePath != null && !"".equals(filePath.trim())) {
-                        extStopWordDictFiles.add(filePath.trim());
+                        extStopWordDictFiles.add(GlobalConfig.getWorkDir() + filePath.trim());
                     }
                 }
             }

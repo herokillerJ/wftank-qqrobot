@@ -17,6 +17,7 @@ public enum ConfigKeyEnum{
         GROUPS("groups"),
         SC_DB_VERSION("sc.database.version"),
         MIRAI_PROTOCOL("mirai.protocol"),
+        MIRAI_PROTOCOL_VERSION("mirai.protocol.version"),
         //翻译
         TRANSLATE_BAIDU_APPID("translate.baidu.appid"),
         TRANSLATE_BAIDU_SECRET("translate.baidu.secret"),

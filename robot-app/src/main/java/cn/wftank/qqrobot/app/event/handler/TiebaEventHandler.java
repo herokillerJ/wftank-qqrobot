@@ -39,7 +39,7 @@ public class TiebaEventHandler implements EventHandler<TiebaNotifyEvent> {
         if (event.isFirst()){
             chain = MessageUtils.newChain()
                     .plus("小助手开始监控"+ event.getAuthorName()+"发的帖子啦！").plus(new Face(Face.ZHENG_YAN))
-                    .plus("，有新消息我会及时发布到群里，可以把关注我来获取最新消息哟~");
+                    .plus("，有新消息我会及时发布到群里，可以关注我来获取最新消息哟~");
         }else{
             chain = MessageUtils.newChain()
                     .plus(event.getAuthorName()+"发布新帖子啦！").plus(new Face(Face.ZHENG_YAN).plus("\n"))

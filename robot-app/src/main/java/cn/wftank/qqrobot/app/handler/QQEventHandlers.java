@@ -44,12 +44,12 @@ public class QQEventHandlers extends SimpleListenerHost {
     private CommonCommandHandler commonCommandHandler;
 
     @Override
-    public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception){
+    public void handleException(CoroutineContext context, Throwable exception){
         // 处理事件处理时抛出的异常
     }
 
     @EventHandler
-    public void onMessage(@NotNull GroupMessageEvent event) throws Exception { // 可以抛出任何异常, 将在 handleException 处理
+    public void onMessage(GroupMessageEvent event) throws Exception { // 可以抛出任何异常, 将在 handleException 处理
         String groups = GlobalConfig.getConfig(ConfigKeyEnum.GROUPS);
         //检查一下群组配置是否为空
         if (StringUtils.isBlank(groups))return;
@@ -61,7 +61,7 @@ public class QQEventHandlers extends SimpleListenerHost {
         //处理接收消息的逻辑
         MessageChain messageChain = event.getMessage();
         boolean isAtBot = false;
-        StringBuilder plainTextBuilder = new StringBuilder("");
+        StringBuilder plainTextBuilder = new StringBuilder();
         //判断是不是在@小助手
         for (int i = 0; i < messageChain.size(); i++) {
             SingleMessage singleMessage = messageChain.get(i);
@@ -209,7 +209,7 @@ public class QQEventHandlers extends SimpleListenerHost {
             while (iterator.hasNext()) {
                 ProductShopVO next = iterator.next();
                 if (next.getLayoutName().toLowerCase().contains("cryastro")) continue;
-                message = message.plus(next.getLayoutNameCn() + "\t价格：" + new BigDecimal(next.getCurrentPrice()).toPlainString() + " auec\n");
+                message = message.plus(next.getLayoutNameCn() + "\t价格：" + BigDecimal.valueOf(next.getCurrentPrice()).toPlainString() + " auec\n");
             }
         }
         if (productVO.getCanRent()) {

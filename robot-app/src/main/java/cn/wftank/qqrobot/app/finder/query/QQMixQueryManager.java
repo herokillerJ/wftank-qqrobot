@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class QQMixQueryManager {
 
-    private Long expireSecond = 5L;
+    private final Long expireSecond = 5L;
 
     /**
      * 通过cache控制session的过期时间等

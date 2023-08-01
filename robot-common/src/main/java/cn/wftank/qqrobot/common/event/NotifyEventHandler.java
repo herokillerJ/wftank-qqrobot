@@ -18,7 +18,7 @@ public class NotifyEventHandler implements EventHandler<NotifyEventWrapper> {
 
     private Map<String, EventHandler> handlerMap;
 
-    private ExecutorService service = new ThreadPoolExecutor(10, 100
+    private final ExecutorService service = new ThreadPoolExecutor(10, 100
             , 2, TimeUnit.MINUTES
             , new ArrayBlockingQueue<>(100), new BasicThreadFactory.Builder()
             .namingPattern("notify-event-publisher-%d").build(), new CallerBlocksPolicy(Duration.ofMinutes(1).toMillis()));
@@ -40,7 +40,7 @@ public class NotifyEventHandler implements EventHandler<NotifyEventWrapper> {
     }
 
     public static class Builder {
-        private Map<String, EventHandler> handlerMap = new ConcurrentHashMap<>();
+        private final Map<String, EventHandler> handlerMap = new ConcurrentHashMap<>();
 
         public void addEventHandler(Class<? extends NotifyEvent> clazz, EventHandler eventHandler) {
             handlerMap.put(clazz.getName(), eventHandler);

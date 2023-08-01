@@ -27,8 +27,8 @@ public class SearchConfig {
         List<IndexEntity> indexList = index.getIndex();
         Index extIndex = OKHttpUtil.get(extIndexUrl, new TypeReference<Index>() {});
         indexList.addAll(extIndex.getIndex());
-        String indexPath = GlobalConfig.getConfig(ConfigKeyEnum.INDEX_FILE_PATH);
-        String analizerPath = GlobalConfig.getConfig(ConfigKeyEnum.ANALYZER_CONFIG_PATH);
+        String indexPath = GlobalConfig.getWorkDir() + GlobalConfig.getConfig(ConfigKeyEnum.INDEX_FILE_PATH);
+        String analizerPath = GlobalConfig.getWorkDir() + GlobalConfig.getConfig(ConfigKeyEnum.ANALYZER_CONFIG_PATH);
         List<String> indexJsonList = indexList.stream().map(JsonUtil::toJson).collect(Collectors.toList());
         return new WFtankSearcher(indexPath , analizerPath,indexJsonList);
     }

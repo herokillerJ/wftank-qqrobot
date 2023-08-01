@@ -3,6 +3,7 @@ package cn.wftank.qqrobot.app.config;
 import cn.wftank.qqrobot.app.handler.QQEventHandlers;
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
+import cn.wftank.qqrobot.common.util.JsonUtil;
 import cn.wftank.qqrobot.common.util.StringUtils;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
@@ -13,6 +14,7 @@ import net.mamoe.mirai.utils.LoggerAdapters;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.cssxsh.mirai.tool.FixProtocolVersion;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class QQbotFactory {
 
     private Bot bot;
 
-    private QQEventHandlers qqEventHandlers;
+    private final QQEventHandlers qqEventHandlers;
 
     public QQbotFactory(QQEventHandlers qqEventHandlers) {
         this.qqEventHandlers = qqEventHandlers;
@@ -39,12 +41,16 @@ public class QQbotFactory {
         }
         BotConfiguration.MiraiProtocol protocol = BotConfiguration.MiraiProtocol.valueOf(miraiProtocol);
         protocol = protocol == null ? BotConfiguration.MiraiProtocol.ANDROID_PHONE : protocol;
-
         BotConfiguration.MiraiProtocol finalProtocol = protocol;
-        Bot bot = BotFactory.INSTANCE.newBot(Long.valueOf(GlobalConfig.getConfig(ConfigKeyEnum.QQ)), BotAuthorization.byQRCode(), new BotConfiguration() {{
+
+        //临时协议修复
+        FixProtocolVersion.fetch(protocol,GlobalConfig.getConfig(ConfigKeyEnum.MIRAI_PROTOCOL_VERSION));
+        log.info(JsonUtil.toJson(FixProtocolVersion.info()));
+
+        Bot bot = BotFactory.INSTANCE.newBot(Long.valueOf(GlobalConfig.getConfig(ConfigKeyEnum.QQ)), BotAuthorization.byPassword(GlobalConfig.getConfig(ConfigKeyEnum.PASSWORD)), new BotConfiguration() {{
             fileBasedDeviceInfo(); // 使用 device.json 存储设备信息
             setProtocol(finalProtocol); // 切换协议
-            File workDir = new File("./qqbot");
+            File workDir = new File(GlobalConfig.getWorkDir() + "qqbot");
             if (!workDir.exists()) {
                 try {
                     Files.createDirectories(workDir.toPath());

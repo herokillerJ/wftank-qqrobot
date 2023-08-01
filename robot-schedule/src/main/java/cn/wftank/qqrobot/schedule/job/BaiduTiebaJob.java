@@ -1,5 +1,6 @@
 package cn.wftank.qqrobot.schedule.job;
 
+import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.event.NotifyEventPublisher;
 import cn.wftank.qqrobot.common.event.tieba.TiebaNotifyEvent;
 import cn.wftank.qqrobot.common.model.event.TiebaThread;
@@ -40,7 +41,7 @@ public class BaiduTiebaJob {
     private void gLaoWatchJob(){
         String jobName = "G-LAO watch job";
         log.info(jobName+" start");
-        File file = new File("./tieba_glao_flag.txt");
+        File file = new File(GlobalConfig.getWorkDir() + "tieba_glao_flag.txt");
         boolean first = false;
         if (!file.exists()){
             first = true;

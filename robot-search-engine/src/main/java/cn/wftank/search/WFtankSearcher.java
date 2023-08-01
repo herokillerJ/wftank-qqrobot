@@ -37,19 +37,19 @@ public class WFtankSearcher implements DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(WFtankSearcher.class);
 
-    private AtomicReference<DirectoryReader> directoryReaderAtomicReference = new AtomicReference<>();
-    private AtomicReference<IndexSearcher> indexSearcherAtomicReference = new AtomicReference<>();
-    private AtomicReference<Analyzer> analyzerAtomicReference = new AtomicReference<>();
+    private final AtomicReference<DirectoryReader> directoryReaderAtomicReference = new AtomicReference<>();
+    private final AtomicReference<IndexSearcher> indexSearcherAtomicReference = new AtomicReference<>();
+    private final AtomicReference<Analyzer> analyzerAtomicReference = new AtomicReference<>();
     /**
      * 索引存放路径
      */
-    private String indexPath;
+    private final String indexPath;
     private static final String DEFAULT_INDEX_PATH = "./search/index-files";
 
     /**
      * 分词器配置文件路径
      */
-    private String analyzerConfigPath;
+    private final String analyzerConfigPath;
     private static final String DEFAULT_ANALYZER_CONFIG_PATH = "./search/ik-analyzer/IKAnalyzer.cfg.xml";
 
     /**

@@ -4,6 +4,5 @@ public enum SpectrumEventType {
 
     ANNOUNCEMENTS,
     PATCH_NOTES,
-    ;
 
 }

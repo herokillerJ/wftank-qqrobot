@@ -19,7 +19,7 @@ public class NotifyEventPublisher implements DisposableBean {
 
     private final RingBuffer<NotifyEventWrapper> ringBuffer;
 
-    private ExecutorService service = new ThreadPoolExecutor(1,1
+    private final ExecutorService service = new ThreadPoolExecutor(1,1
             ,2, TimeUnit.MINUTES
             ,new SynchronousQueue<>(), new BasicThreadFactory.Builder()
             .namingPattern("notify-event-publisher-%d").build(), new CallerBlocksPolicy(Duration.ofMinutes(1).toMillis()));

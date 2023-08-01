@@ -62,9 +62,9 @@ public class DiscordEventHandlers {
             if (!CollectionUtils.isEmpty(embeds)){
                 msgList.add("\n内嵌消息：");
                 embeds.stream().forEach(embed -> {
-                    embed.getAuthor().ifPresent(author -> msgList.add("\n作者："+author.getName()+""));
+                    embed.getAuthor().ifPresent(author -> msgList.add("\n作者："+author.getName()));
                     embed.getTitle().ifPresent(title -> {
-                        msgList.add("\n标题："+title+"");
+                        msgList.add("\n标题："+title);
                         msgList.add("\n[机翻："+translator.translateEn2Cn(title)+"]");
                     });
                     embed.getDescription().filter(StringUtils::hasText)
@@ -98,7 +98,7 @@ public class DiscordEventHandlers {
         if (StringUtils.hasText(channelStr)){
             if (Arrays.asList(channelStr.split(",")).contains(message.getChannelId().asString())) {
                 flag=true;
-            };
+            }
         }
         return flag;
     }

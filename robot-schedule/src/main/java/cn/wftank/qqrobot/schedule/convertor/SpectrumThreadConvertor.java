@@ -2,8 +2,6 @@ package cn.wftank.qqrobot.schedule.convertor;
 
 import cn.wftank.qqrobot.common.model.event.SpectrumThread;
 import cn.wftank.qqrobot.schedule.model.vo.response.spectrum.ThreadsItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
 public class SpectrumThreadConvertor {

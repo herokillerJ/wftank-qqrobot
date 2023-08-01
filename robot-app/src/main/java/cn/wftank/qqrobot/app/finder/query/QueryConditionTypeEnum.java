@@ -31,7 +31,7 @@ public enum QueryConditionTypeEnum {
     //描述
     private String des;
 
-    private static LinkedList<Integer> avalibleCodeList = new LinkedList<>();
+    private static final LinkedList<Integer> avalibleCodeList = new LinkedList<>();
 
     static {
         avalibleCodeList.add(NAME.getIndex());

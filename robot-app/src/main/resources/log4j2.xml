@@ -2,8 +2,8 @@
 <configuration status="WARN" monitorInterval="30">
 
     <properties>
-        <Property name="fileName">./logs</Property>
-        <Property name="fileGz">./logs/gz</Property>
+        <Property name="fileName">$${env:QQBOT_PATH:-./}logs</Property>
+        <Property name="fileGz">$${env:QQBOT_PATH:-./}logs/gz</Property>
         <Property name="LOG_PATTERN">%d [%-5p] [%t] (%C.%M:%L) - %m%n</Property>
     </properties>
 

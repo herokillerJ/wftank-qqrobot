@@ -34,7 +34,7 @@ import org.wltea.analyzer.cfg.DefaultConfig;
  */
 public final class ExtIKAnalyzer extends Analyzer {
 
-    private Configuration configuration;
+    private final Configuration configuration;
 
     /**
      * IK分词器Lucene Analyzer接口实现类

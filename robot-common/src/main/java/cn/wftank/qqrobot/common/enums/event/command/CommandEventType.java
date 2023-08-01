@@ -5,6 +5,5 @@ public enum CommandEventType {
     CREATE,
     MODIFY,
     DELETE,
-    ;
 
 }

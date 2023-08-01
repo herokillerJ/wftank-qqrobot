@@ -42,8 +42,8 @@ public class OKHttpUtil {
         Dispatcher dispatcher = new Dispatcher(executorService);
         dispatcher.setMaxRequests(MAX_REQUEST);
         dispatcher.setMaxRequestsPerHost(MAX_REQUEST_PER_HOST);
-
         client = new OkHttpClient.Builder()
+//                .proxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1",7890)))
                 .connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)

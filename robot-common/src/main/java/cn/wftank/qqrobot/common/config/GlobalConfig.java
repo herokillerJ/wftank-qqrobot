@@ -15,7 +15,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -30,10 +32,11 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 public class GlobalConfig {
-    private static Logger logger = LoggerFactory.getLogger(GlobalConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(GlobalConfig.class);
 
     //bot
-    public static final String CONFIG_DIR = "./";
+    public static final String DEFAULT_WORK_DIR = "./";
+    public static final String WORK_PATH_ENV_NAME = "QQBOT_PATH";
     public static final String CONFIG_NAME;
     static {
         String property = System.getProperty("spring.profiles.active");
@@ -42,14 +45,25 @@ public class GlobalConfig {
             filePath = "config-"+property+".properties";
         }
         CONFIG_NAME = filePath;
+
+        String workPath = System.getenv(WORK_PATH_ENV_NAME);
+        if (StringUtils.isNotBlank(workPath)){
+            WORK_DIR = workPath;
+            CONFIG_PATH = workPath + CONFIG_NAME;
+        }else{
+            WORK_DIR = DEFAULT_WORK_DIR;
+            CONFIG_PATH = DEFAULT_WORK_DIR + CONFIG_NAME;
+        }
+
     }
-    private static final String CONFIG_PATH = CONFIG_DIR+CONFIG_NAME;
+    private static final String WORK_DIR;
+    private static final String CONFIG_PATH;
 
     private static final ExecutorService GLOBALCONFIG_MONITOR = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().daemon(true).namingPattern("globalconfig-monitor").build());
 
     static {
         try {
-            WatchDir watchDir = new WatchDir(Paths.get(CONFIG_DIR).toAbsolutePath().normalize(), false, (event, filePath) -> {
+            WatchDir watchDir = new WatchDir(Paths.get(WORK_DIR).toAbsolutePath().normalize(), false, (event, filePath) -> {
                 if (filePath.getFileName().equals(CONFIG_NAME)){
                     refreshConfig();
                 }
@@ -120,6 +134,10 @@ public class GlobalConfig {
 
     public static String getConfig(ConfigKeyEnum key){
         return configCache.get(key);
+    }
+
+    public static String getWorkDir(){
+        return WORK_DIR;
     }
 
 

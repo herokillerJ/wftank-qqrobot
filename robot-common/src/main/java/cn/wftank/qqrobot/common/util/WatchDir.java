@@ -53,11 +53,11 @@ public class WatchDir {
     private final boolean recursive;
     private boolean trace = false;
 
-    private EventHandler eventHandler;
+    private final EventHandler eventHandler;
 
-    private WatchEvent.Kind<?>[] events;
+    private final WatchEvent.Kind<?>[] events;
 
-    private static Logger logger = LoggerFactory.getLogger(WatchDir.class);
+    private static final Logger logger = LoggerFactory.getLogger(WatchDir.class);
 
 
     @SuppressWarnings("unchecked")

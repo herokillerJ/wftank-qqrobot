@@ -44,7 +44,7 @@ import java.io.IOException;
 public final class ExtConfigIKTokenizer extends Tokenizer {
 
     // IK分词器实现
-    private IKSegmenter _IKImplement;
+    private final IKSegmenter _IKImplement;
 
     // 词元文本属性
     private final CharTermAttribute termAtt;
@@ -115,7 +115,7 @@ public final class ExtConfigIKTokenizer extends Tokenizer {
     }
 
     @Override
-    public final void end() {
+    public void end() {
         // set final offset
         int finalOffset = correctOffset(this.endPosition);
         offsetAtt.setOffset(finalOffset, finalOffset);

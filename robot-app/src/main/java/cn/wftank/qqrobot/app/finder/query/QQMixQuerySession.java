@@ -107,7 +107,7 @@ public class QQMixQuerySession {
         List<Document> resultDoc = wftankSearcher.search(QueryConditionParser.parseConditionMap(conditionMap,wftankSearcher), 10);
         if (CollectionUtils.isNotEmpty(resultDoc)){
             for (Document doc : resultDoc) {
-                result.add(""+num + "：" +doc.get("name_cn")+"["+doc.get("name")+"]");
+                result.add(num + "：" +doc.get("name_cn")+"["+doc.get("name")+"]");
                 num++;
             }
         }

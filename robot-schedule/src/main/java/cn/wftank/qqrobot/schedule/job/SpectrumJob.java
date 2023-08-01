@@ -1,5 +1,6 @@
 package cn.wftank.qqrobot.schedule.job;
 
+import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.enums.event.spectrum.SpectrumEventType;
 import cn.wftank.qqrobot.common.event.NotifyEventPublisher;
 import cn.wftank.qqrobot.common.event.spectrum.SpectrumNotifyEvent;
@@ -41,7 +42,7 @@ public class SpectrumJob {
     private void AnnouncementsWatchJob(){
         String jobName = "spectrum announcements watch job";
         log.info(jobName+" start");
-        File file = new File("./spectrum_announcements_flag.txt");
+        File file = new File(GlobalConfig.getWorkDir() + "spectrum_announcements_flag.txt");
         boolean first = false;
         if (!file.exists()){
             first = true;

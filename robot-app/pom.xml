@@ -42,6 +42,11 @@
       <artifactId>robot-search-engine</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context-indexer</artifactId>
+      <optional>true</optional>
+    </dependency>
     <!-- 命令行框架 -->
     <dependency>
       <groupId>info.picocli</groupId>
@@ -52,7 +57,7 @@
     <dependency>
       <groupId>net.mamoe</groupId>
       <artifactId>mirai-core-jvm</artifactId>
-      <version>2.15.0-RC</version> <!-- 替换版本为你需要的版本 -->
+      <version>2.15.0</version> <!-- 替换版本为你需要的版本 -->
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
@@ -67,9 +72,9 @@
     <dependency>
       <groupId>xyz.cssxsh.mirai.tool</groupId>
       <artifactId>fix-protocal-version</artifactId>
-      <version>1.8.4</version>
+      <version>1.9.10</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/src/lib/fix-protocol-version-1.8.4.mirai2.jar</systemPath>
+      <systemPath>${project.basedir}/src/lib/fix-protocol-version-1.9.10.mirai2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
@@ -92,8 +97,20 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.asynchttpclient</groupId>
+      <artifactId>async-http-client</artifactId>
+      <version>2.12.3</version>
+    </dependency>
 
   </dependencies>
+<!--  <repositories>-->
+<!--    <repository>-->
+<!--      <id>localrepository</id>-->
+<!--      <url>file://>${project.basedir}/src/lib</url>-->
+<!--    </repository>-->
+<!--  </repositories>-->
+
   <build>
     <plugins>
       <plugin>
@@ -101,29 +118,6 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <includeSystemScope>true</includeSystemScope>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <!-- annotationProcessorPaths requires maven-compiler-plugin version 3.5 or higher -->
-        <version>3.8.1</version>
-        <configuration>
-          <annotationProcessorPaths>
-            <path>
-              <groupId>info.picocli</groupId>
-              <artifactId>picocli-codegen</artifactId>
-              <version>4.6.1</version>
-            </path>
-            <path>
-              <groupId>org.projectlombok</groupId>
-              <artifactId>lombok</artifactId>
-              <version>1.18.18</version>
-            </path>
-          </annotationProcessorPaths>
-          <compilerArgs>
-            <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
-          </compilerArgs>
         </configuration>
       </plugin>
     </plugins>

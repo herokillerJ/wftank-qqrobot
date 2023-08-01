@@ -37,15 +37,15 @@ import java.util.stream.Collectors;
 
 public class SCDataFinder {
 
-    private List<IndexEntity> indexList = new CopyOnWriteArrayList<>();
+    private final List<IndexEntity> indexList = new CopyOnWriteArrayList<>();
 
-    private Map<Pattern,Integer> patternMap = new LinkedHashMap<>();
+    private final Map<Pattern,Integer> patternMap = new LinkedHashMap<>();
     //字符串匹配算法
-    private StringDistance similarMatcher = new MetricLCS();
+    private final StringDistance similarMatcher = new MetricLCS();
 
-    private WFtankSearcher wFtankSearcher;
+    private final WFtankSearcher wFtankSearcher;
 
-    private AtomicReference<String> currentVersion = new AtomicReference<>();
+    private final AtomicReference<String> currentVersion = new AtomicReference<>();
 
     public SCDataFinder(@Autowired WFtankSearcher wFtankSearcher) {
         this.wFtankSearcher = wFtankSearcher;

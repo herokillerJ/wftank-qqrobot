@@ -4,7 +4,6 @@ import cn.wftank.qqrobot.app.config.QQbotFactory;
 import cn.wftank.qqrobot.common.config.ConfigKeyEnum;
 import cn.wftank.qqrobot.common.config.GlobalConfig;
 import cn.wftank.qqrobot.common.util.FileUtil;
-import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.file.AbsoluteFile;
 import net.mamoe.mirai.message.data.MessageChain;

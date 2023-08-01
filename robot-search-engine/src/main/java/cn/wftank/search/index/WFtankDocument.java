@@ -18,12 +18,12 @@ import java.math.BigDecimal;
  */
 public class WFtankDocument {
 
-    private Document document = new Document();
+    private final Document document = new Document();
 
     /**
      * 字符串是否需要被整个索引,不分词
      */
-    private int singleTokenMaxLength;
+    private final int singleTokenMaxLength;
 
     /**
      * 文档的id,全局唯一,如果id相同会更新文档而不是新增

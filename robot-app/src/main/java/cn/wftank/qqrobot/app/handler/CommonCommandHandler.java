@@ -12,7 +12,6 @@ import net.mamoe.mirai.contact.file.AbsoluteFile;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
-import net.mamoe.mirai.message.data.OfflineAudio;
 import net.mamoe.mirai.utils.ExternalResource;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -20,7 +19,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeType;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +35,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 public class CommonCommandHandler {
 
-    private NotifyEventPublisher notifyEventPublisher;
+    private final NotifyEventPublisher notifyEventPublisher;
 
     public CommonCommandHandler(NotifyEventPublisher notifyEventPublisher) {
         this.notifyEventPublisher = notifyEventPublisher;
@@ -120,7 +118,6 @@ public class CommonCommandHandler {
             messageBuilder.add(String.join("\n",commandMap.keySet()));
             messageBuilder.add("\n*在哪买(查询游戏内商品在哪买,如:\"短剑在哪买\")");
             messageBuilder.add("\ngj(高级查询,可根据尺寸名称类型搜索商品名称)");
-            ;
         }else{
             Path path = commandMap.get(command);
             try {
